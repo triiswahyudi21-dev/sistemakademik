@@ -418,17 +418,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Helper untuk membersihkan tanda petik pembungkus bawaan Excel TSV & tanda petik ganda
+        // Helper pembersihan karakter & kutipan Excel TSV tanpa merusak petik tunggal/ganda di dalam nama
         window.cleanValue = function(val) {
             if (val === null || val === undefined) return '';
             let str = val.toString().trim();
-            if (str.startsWith('"') && str.endsWith('"')) {
+            // Lepas petik pembungkus bawaan Excel jika ada
+            if (str.length >= 2 && str.startsWith('"') && str.endsWith('"')) {
                 str = str.slice(1, -1);
             }
+            // Ubah double double-quotes bawaan Excel menjadi petik ganda tunggal
             return str.replace(/""/g, '"').trim();
         };
 
-        // Helper untuk keamanan penayangan HTML agar karakter petik tunggal/ganda tidak membuat sintaks HTML error
+        // Helper keamanan rendering HTML
         window.escapeHTML = function(str) {
             if (str === null || str === undefined) return '';
             return String(str)
@@ -439,7 +441,16 @@
                 .replace(/'/g, '&#39;');
         };
 
-        window.CLASSES = ['7A', '7B', '7C', '7D', '8A', '8B', '8C', '8D', '9A', '9B', '9C', '9D'];
+        window.defaultClasses = ['7A', '7B', '7C', '7D', '8A', '8B', '8C', '8D', '9A', '9B', '9C', '9D'];
+        
+        // Ambil daftar seluruh kelas secara dinamis (default + kelas dari siswa)
+        window.getAllClasses = function() {
+            const studentClasses = (window.students || []).map(s => s.kelas).filter(Boolean);
+            const combined = Array.from(new Set([...window.defaultClasses, ...studentClasses]));
+            combined.sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
+            return combined;
+        };
+
         window.students = JSON.parse(localStorage.getItem('app_students')) || [];
         window.schedules = JSON.parse(localStorage.getItem('app_schedules')) || {};
         window.waliKelas = JSON.parse(localStorage.getItem('app_waliKelas')) || {};
@@ -483,6 +494,7 @@
             if (snapshot.exists()) {
                 window.students = snapshot.val() || [];
                 localStorage.setItem('app_students', JSON.stringify(window.students));
+                populateSelectors();
                 renderStudents();
                 renderRombelCards();
             }
@@ -685,27 +697,39 @@
         };
 
         window.populateSelectors = function() {
+            const classes = window.getAllClasses();
             ['jadwalClassFilter', 'absensiClassFilter', 'nilaiClassFilter', 'rekapAbsenClassFilter', 'formWaliKelas'].forEach(selId => {
                 const sel = document.getElementById(selId);
                 if(sel) {
+                    const currentVal = sel.value;
                     sel.innerHTML = '';
-                    CLASSES.forEach(cls => {
-                        sel.innerHTML += `<option value="${cls}">${cls}</option>`;
+                    classes.forEach(cls => {
+                        sel.innerHTML += `<option value="${escapeHTML(cls)}">${escapeHTML(cls)}</option>`;
                     });
+                    if(currentVal && classes.includes(currentVal)) {
+                        sel.value = currentVal;
+                    }
                 }
             });
         };
 
         function updateStudentsInFirebase(dataBaru, kelasYangDiUpload) {
+            // Hapus data lama KHUSUS kelas yang ada di dalam daftar diimport/di-paste
             let updatedStudents = window.students.filter(s => !kelasYangDiUpload.includes(s.kelas));
+            // Tambahkan data baru
             updatedStudents = [...updatedStudents, ...dataBaru];
             
+            // Urutkan siswa berdasarkan Kelas lalu No Absen
             updatedStudents.sort((a, b) => {
-                if (a.kelas !== b.kelas) return a.kelas.localeCompare(b.kelas);
-                return parseInt(a.absen) - parseInt(b.absen);
+                if (a.kelas !== b.kelas) return a.kelas.localeCompare(b.kelas, undefined, {numeric: true});
+                let numA = parseInt(a.absen) || 0;
+                let numB = parseInt(b.absen) || 0;
+                if (numA !== numB) return numA - numB;
+                return a.absen.localeCompare(b.absen);
             });
 
             window.students = updatedStudents;
+            populateSelectors();
             renderStudents();
             renderRombelCards();
             saveToFirebase('students', updatedStudents);
@@ -745,7 +769,7 @@
                 });
 
                 updateStudentsInFirebase(dataBaru, kelasYangDiUpload);
-                alert(`Data berhasil disimpan! Kelas terisi: ${kelasYangDiUpload.join(', ')}.`);
+                alert(`Data berhasil disimpan! Jumlah total terproses: ${dataBaru.length} siswa untuk kelas: ${kelasYangDiUpload.join(', ')}.`);
                 e.target.value = '';
                 document.getElementById('fileNameDisplay').innerText = 'Klik untuk upload file Excel (.xlsx)';
             };
@@ -753,20 +777,21 @@
         };
 
         window.handlePasteSubmit = function() {
-            const rawText = document.getElementById('pasteInput').value.trim();
-            if(!rawText) return alert('Silakan tempelkan data terlebih dahulu!');
+            const rawText = document.getElementById('pasteInput').value;
+            if(!rawText.trim()) return alert('Silakan tempelkan data terlebih dahulu!');
 
-            const lines = rawText.split('\n');
+            const lines = rawText.split(/\r?\n/);
             let dataBaru = [];
             let kelasYangDiUpload = [];
 
             lines.forEach(line => {
-                if(!line.trim()) return;
+                let trimmedLine = line.trim();
+                if(!trimmedLine) return;
                 
-                // Gunakan tab pisahan Excel bawaan TSV
+                // Gunakan pembatas TAB bawaan Excel
                 let cols = line.split('\t');
                 if (cols.length < 3) {
-                    cols = line.split(/\t+|\s{2,}/);
+                    cols = trimmedLine.split(/\t+|\s{2,}/);
                 }
 
                 if(cols.length >= 3) {
@@ -775,16 +800,18 @@
                     let jk = cleanValue(cols[2]).toUpperCase().startsWith('P') ? 'P' : 'L';
                     let kelasSiswa = formatClassName(cleanValue(cols[3] || '7A'));
 
-                    if(noAbsen.toLowerCase().includes('no') || namaSiswa.toLowerCase().includes('nama')) return;
+                    if(noAbsen.toLowerCase().includes('no') && namaSiswa.toLowerCase().includes('nama')) return;
 
-                    if(!kelasYangDiUpload.includes(kelasSiswa)) kelasYangDiUpload.push(kelasSiswa);
+                    if(namaSiswa) {
+                        if(!kelasYangDiUpload.includes(kelasSiswa)) kelasYangDiUpload.push(kelasSiswa);
 
-                    dataBaru.push({
-                        absen: noAbsen,
-                        nama: namaSiswa,
-                        jk: jk,
-                        kelas: kelasSiswa
-                    });
+                        dataBaru.push({
+                            absen: noAbsen,
+                            nama: namaSiswa,
+                            jk: jk,
+                            kelas: kelasSiswa
+                        });
+                    }
                 }
             });
 
@@ -804,16 +831,19 @@
             if(opsi.toUpperCase() === 'SEMUA') {
                 if(confirm('Hapus SELURUH data siswa?')) {
                     window.students = [];
+                    populateSelectors();
                     renderStudents();
                     renderRombelCards();
                     saveToFirebase('students', []);
                 }
             } else {
                 let kelasTarget = formatClassName(opsi);
-                if(CLASSES.includes(kelasTarget)) {
+                let classes = window.getAllClasses();
+                if(classes.includes(kelasTarget)) {
                     if(confirm(`Hapus seluruh siswa kelas ${kelasTarget}?`)) {
                         let updated = window.students.filter(s => s.kelas !== kelasTarget);
                         window.students = updated;
+                        populateSelectors();
                         renderStudents();
                         renderRombelCards();
                         saveToFirebase('students', updated);
@@ -847,13 +877,14 @@
             const container = document.getElementById('rombelCards');
             if(!container) return;
             container.innerHTML = '';
-            CLASSES.forEach(cls => {
+            const classes = window.getAllClasses();
+            classes.forEach(cls => {
                 const count = window.students.filter(s => s.kelas === cls).length;
                 container.innerHTML += `
                     <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-all">
                         <div>
                             <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Rombel</span>
-                            <h4 class="text-lg font-bold text-white mt-0.5">${cls}</h4>
+                            <h4 class="text-lg font-bold text-white mt-0.5">${escapeHTML(cls)}</h4>
                         </div>
                         <div class="mt-3 flex items-center justify-between border-t border-slate-800/80 pt-2.5">
                             <span class="text-[11px] text-slate-400 font-medium">Siswa</span>
@@ -867,11 +898,12 @@
             const body = document.getElementById('waliTableBody');
             if(!body) return;
             body.innerHTML = '';
-            CLASSES.forEach(cls => {
+            const classes = window.getAllClasses();
+            classes.forEach(cls => {
                 const w = window.waliKelas[cls] || { nama: '-', nip: '-' };
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="px-4 py-2.5 font-bold text-emerald-400">${cls}</td>
+                        <td class="px-4 py-2.5 font-bold text-emerald-400">${escapeHTML(cls)}</td>
                         <td class="px-4 py-2.5 text-slate-200 font-medium">${escapeHTML(w.nama)}</td>
                         <td class="px-4 py-2.5 text-slate-400 font-mono">${escapeHTML(w.nip)}</td>
                     </tr>`;
@@ -945,16 +977,17 @@
 
             listSiswa.forEach(s => {
                 const status = currentAttendance[s.absen] || 'H';
+                const safeAbsen = escapeHTML(s.absen);
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
-                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${escapeHTML(s.absen)}</td>
+                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${safeAbsen}</td>
                         <td class="px-3 py-2 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
                         <td class="px-3 py-2 text-center font-bold ${s.jk === 'P' ? 'text-pink-400' : 'text-sky-400'}">${escapeHTML(s.jk || 'L')}</td>
                         <td class="px-3 py-2 text-center">
                             <div class="flex justify-center gap-3">
                                 ${['H', 'S', 'I', 'A'].map(opt => `
                                     <label class="inline-flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" name="att_${escapeHTML(s.absen)}" value="${opt}" ${status === opt ? 'checked' : ''} class="accent-emerald-500">
+                                        <input type="radio" name="att_${safeAbsen}" value="${opt}" ${status === opt ? 'checked' : ''} class="accent-emerald-500">
                                         <span class="text-xs font-bold ${opt === 'H' ? 'text-emerald-400' : opt === 'S' ? 'text-amber-400' : opt === 'I' ? 'text-sky-400' : 'text-rose-400'}">${opt}</span>
                                     </label>
                                 `).join('')}
@@ -973,7 +1006,8 @@
             let attData = {};
 
             listSiswa.forEach(s => {
-                const checkedOption = document.querySelector(`input[name="att_${escapeHTML(s.absen)}"]:checked`);
+                const safeAbsen = escapeHTML(s.absen);
+                const checkedOption = document.querySelector(`input[name="att_${safeAbsen}"]:checked`);
                 if(checkedOption) attData[s.absen] = checkedOption.value;
             });
 
@@ -1001,12 +1035,12 @@
                     <tr class="hover:bg-slate-800/40">
                         <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${safeAbsen}</td>
                         <td class="px-3 py-2 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="t1_${safeAbsen}" value="${g.t1 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="t2_${safeAbsen}" value="${g.t2 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="t3_${safeAbsen}" value="${g.t3 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="t4_${safeAbsen}" value="${g.t4 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="uts_${safeAbsen}" value="${g.uts || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="uas_${safeAbsen}" value="${g.uas || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="t1_${safeAbsen}" value="${escapeHTML(g.t1 || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="t2_${safeAbsen}" value="${escapeHTML(g.t2 || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="t3_${safeAbsen}" value="${escapeHTML(g.t3 || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="t4_${safeAbsen}" value="${escapeHTML(g.t4 || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="uts_${safeAbsen}" value="${escapeHTML(g.uts || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="uas_${safeAbsen}" value="${escapeHTML(g.uas || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
                     </tr>`;
             });
         };
