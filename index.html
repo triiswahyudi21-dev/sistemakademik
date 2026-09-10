@@ -140,7 +140,7 @@
                         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-1">
                             <p class="font-bold text-slate-300"><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> Cara Menggunakan Copy-Paste:</p>
                             <p>Copy baris dari Microsoft Excel / Google Sheets lalu tempelkan di kotak berikut.</p>
-                            <p class="text-slate-500 italic">Contoh format: 1 [Tab] Ahmad Dahlan [Tab] L [Tab] 7A</p>
+                            <p class="text-slate-500 italic">Contoh format: 1 [Tab] M. Sa'id [Tab] L [Tab] 7A</p>
                         </div>
                         <textarea id="pasteInput" rows="5" placeholder="Paste data Excel Anda di sini (Format: No [Tab] Nama [Tab] L/P [Tab] Kelas)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 outline-none focus:border-emerald-500"></textarea>
                         <button onclick="handlePasteSubmit()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-2">
@@ -418,6 +418,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Helper untuk membersihkan tanda petik pembungkus bawaan Excel TSV & tanda petik ganda
+        window.cleanValue = function(val) {
+            if (val === null || val === undefined) return '';
+            let str = val.toString().trim();
+            if (str.startsWith('"') && str.endsWith('"')) {
+                str = str.slice(1, -1);
+            }
+            return str.replace(/""/g, '"').trim();
+        };
+
+        // Helper untuk keamanan penayangan HTML agar karakter petik tunggal/ganda tidak membuat sintaks HTML error
+        window.escapeHTML = function(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
+
         window.CLASSES = ['7A', '7B', '7C', '7D', '8A', '8B', '8C', '8D', '9A', '9B', '9C', '9D'];
         window.students = JSON.parse(localStorage.getItem('app_students')) || [];
         window.schedules = JSON.parse(localStorage.getItem('app_schedules')) || {};
@@ -593,7 +614,7 @@
             if(!select) return;
             select.innerHTML = '';
             window.tapelList.forEach(t => {
-                select.innerHTML += `<option value="${t}" ${t === window.selectedTapel ? 'selected' : ''}>${t}</option>`;
+                select.innerHTML += `<option value="${escapeHTML(t)}" ${t === window.selectedTapel ? 'selected' : ''}>${escapeHTML(t)}</option>`;
             });
         };
 
@@ -624,12 +645,14 @@
             container.innerHTML = '';
             window.tapelList.forEach(t => {
                 const isActive = t === window.selectedTapel;
+                const safeT = escapeHTML(t);
+                const escapedForOnClick = t.replace(/'/g, "\\'");
                 container.innerHTML += `
                     <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                         <span class="text-xs font-semibold ${isActive ? 'text-emerald-400 font-bold' : 'text-slate-300'}">
-                            ${t} ${isActive ? '<span class="text-[10px] bg-emerald-950 border border-emerald-800 text-emerald-400 px-1.5 py-0.5 rounded-md ml-1">Aktif</span>' : ''}
+                            ${safeT} ${isActive ? '<span class="text-[10px] bg-emerald-950 border border-emerald-800 text-emerald-400 px-1.5 py-0.5 rounded-md ml-1">Aktif</span>' : ''}
                         </span>
-                        <button onclick="deleteTapel('${t}')" class="text-rose-400 hover:text-rose-300 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-rose-950/50 transition-all">
+                        <button onclick="deleteTapel('${escapedForOnClick}')" class="text-rose-400 hover:text-rose-300 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-rose-950/50 transition-all">
                             <i class="fa-solid fa-trash-can text-xs"></i>
                         </button>
                     </div>`;
@@ -637,7 +660,7 @@
         };
 
         window.submitTapel = function() {
-            const tapelBaru = document.getElementById('formTapelBaru').value.trim();
+            const tapelBaru = cleanValue(document.getElementById('formTapelBaru').value);
             if(!tapelBaru) return alert('Format Tahun Pelajaran tidak boleh kosong!');
             if(window.tapelList.includes(tapelBaru)) return alert('Tahun Pelajaran tersebut sudah ada.');
 
@@ -707,14 +730,15 @@
                     let jk = row['Jenis Kelamin'] || row['jenis kelamin'] || row['JK'] || row['jk'] || row['L/P'] || row['l/p'] || 'L';
                     let kelasSiswa = row['Kelas'] || row['kelas'] || row['KELAS'] || '7A';
                     
-                    let kelasFormatted = formatClassName(kelasSiswa);
-                    let jkFormatted = jk.toString().trim().toUpperCase().startsWith('P') ? 'P' : 'L';
+                    let kelasFormatted = formatClassName(cleanValue(kelasSiswa));
+                    let jkFormatted = cleanValue(jk).toUpperCase().startsWith('P') ? 'P' : 'L';
+                    let namaClean = cleanValue(namaSiswa);
 
                     if(!kelasYangDiUpload.includes(kelasFormatted)) kelasYangDiUpload.push(kelasFormatted);
 
                     return {
-                        absen: noAbsen.toString().trim(),
-                        nama: namaSiswa.toString().trim(),
+                        absen: cleanValue(noAbsen),
+                        nama: namaClean,
                         jk: jkFormatted,
                         kelas: kelasFormatted
                     };
@@ -738,13 +762,18 @@
 
             lines.forEach(line => {
                 if(!line.trim()) return;
-                const cols = line.split(/\t+|\s{2,}/);
+                
+                // Gunakan tab pisahan Excel bawaan TSV
+                let cols = line.split('\t');
+                if (cols.length < 3) {
+                    cols = line.split(/\t+|\s{2,}/);
+                }
 
                 if(cols.length >= 3) {
-                    let noAbsen = cols[0].trim();
-                    let namaSiswa = cols[1].trim();
-                    let jk = cols[2].trim().toUpperCase().startsWith('P') ? 'P' : 'L';
-                    let kelasSiswa = formatClassName(cols[3] || '7A');
+                    let noAbsen = cleanValue(cols[0]);
+                    let namaSiswa = cleanValue(cols[1]);
+                    let jk = cleanValue(cols[2]).toUpperCase().startsWith('P') ? 'P' : 'L';
+                    let kelasSiswa = formatClassName(cleanValue(cols[3] || '7A'));
 
                     if(noAbsen.toLowerCase().includes('no') || namaSiswa.toLowerCase().includes('nama')) return;
 
@@ -806,10 +835,10 @@
 
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${s.absen}</td>
-                        <td class="px-3 py-2 text-slate-200 font-medium">${s.nama}</td>
+                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${escapeHTML(s.absen)}</td>
+                        <td class="px-3 py-2 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
                         <td class="px-3 py-2 text-center">${jkBadge}</td>
-                        <td class="px-3 py-2 text-center"><span class="bg-emerald-950 border border-emerald-800/60 text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded-md">${s.kelas}</span></td>
+                        <td class="px-3 py-2 text-center"><span class="bg-emerald-950 border border-emerald-800/60 text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded-md">${escapeHTML(s.kelas)}</span></td>
                     </tr>`;
             });
         };
@@ -843,8 +872,8 @@
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40 transition-colors">
                         <td class="px-4 py-2.5 font-bold text-emerald-400">${cls}</td>
-                        <td class="px-4 py-2.5 text-slate-200 font-medium">${w.nama}</td>
-                        <td class="px-4 py-2.5 text-slate-400 font-mono">${w.nip}</td>
+                        <td class="px-4 py-2.5 text-slate-200 font-medium">${escapeHTML(w.nama)}</td>
+                        <td class="px-4 py-2.5 text-slate-400 font-mono">${escapeHTML(w.nip)}</td>
                     </tr>`;
             });
         };
@@ -853,8 +882,8 @@
         window.closeModalWali = function() { document.getElementById('modalWali').classList.add('hidden'); };
         window.submitWali = function() {
             const cls = document.getElementById('formWaliKelas').value;
-            const nama = document.getElementById('formWaliNama').value.trim();
-            const nip = document.getElementById('formWaliNip').value.trim();
+            const nama = cleanValue(document.getElementById('formWaliNama').value);
+            const nip = cleanValue(document.getElementById('formWaliNip').value);
             if(!nama) return alert('Nama Wali Kelas Wajib diisi');
 
             window.waliKelas[cls] = { nama, nip };
@@ -868,7 +897,7 @@
         window.submitJadwal = function() {
             const cls = document.getElementById('jadwalClassFilter').value;
             const hari = document.getElementById('formHari').value;
-            const mapel = document.getElementById('formMapel').value.trim();
+            const mapel = cleanValue(document.getElementById('formMapel').value);
             const jamMulai = document.getElementById('formJamMulai').value;
             const jamSelesai = document.getElementById('formJamSelesai').value;
 
@@ -895,9 +924,9 @@
             list.forEach(j => {
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
-                        <td class="px-4 py-2.5 font-bold text-emerald-400">${j.hari}</td>
-                        <td class="px-4 py-2.5 text-slate-400 font-mono">${j.jamMulai} - ${j.jamSelesai}</td>
-                        <td class="px-4 py-2.5 text-slate-200 font-medium">${j.mapel}</td>
+                        <td class="px-4 py-2.5 font-bold text-emerald-400">${escapeHTML(j.hari)}</td>
+                        <td class="px-4 py-2.5 text-slate-400 font-mono">${escapeHTML(j.jamMulai)} - ${escapeHTML(j.jamSelesai)}</td>
+                        <td class="px-4 py-2.5 text-slate-200 font-medium">${escapeHTML(j.mapel)}</td>
                     </tr>`;
             });
         };
@@ -918,14 +947,14 @@
                 const status = currentAttendance[s.absen] || 'H';
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
-                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${s.absen}</td>
-                        <td class="px-3 py-2 text-slate-200 font-medium">${s.nama}</td>
-                        <td class="px-3 py-2 text-center font-bold ${s.jk === 'P' ? 'text-pink-400' : 'text-sky-400'}">${s.jk || 'L'}</td>
+                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${escapeHTML(s.absen)}</td>
+                        <td class="px-3 py-2 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
+                        <td class="px-3 py-2 text-center font-bold ${s.jk === 'P' ? 'text-pink-400' : 'text-sky-400'}">${escapeHTML(s.jk || 'L')}</td>
                         <td class="px-3 py-2 text-center">
                             <div class="flex justify-center gap-3">
                                 ${['H', 'S', 'I', 'A'].map(opt => `
                                     <label class="inline-flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" name="att_${s.absen}" value="${opt}" ${status === opt ? 'checked' : ''} class="accent-emerald-500">
+                                        <input type="radio" name="att_${escapeHTML(s.absen)}" value="${opt}" ${status === opt ? 'checked' : ''} class="accent-emerald-500">
                                         <span class="text-xs font-bold ${opt === 'H' ? 'text-emerald-400' : opt === 'S' ? 'text-amber-400' : opt === 'I' ? 'text-sky-400' : 'text-rose-400'}">${opt}</span>
                                     </label>
                                 `).join('')}
@@ -944,7 +973,7 @@
             let attData = {};
 
             listSiswa.forEach(s => {
-                const checkedOption = document.querySelector(`input[name="att_${s.absen}"]:checked`);
+                const checkedOption = document.querySelector(`input[name="att_${escapeHTML(s.absen)}"]:checked`);
                 if(checkedOption) attData[s.absen] = checkedOption.value;
             });
 
@@ -967,16 +996,17 @@
 
             listSiswa.forEach(s => {
                 const g = currentGrades[s.absen] || { t1: '', t2: '', t3: '', t4: '', uts: '', uas: '' };
+                const safeAbsen = escapeHTML(s.absen);
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
-                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${s.absen}</td>
-                        <td class="px-3 py-2 text-slate-200 font-medium">${s.nama}</td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="t1_${s.absen}" value="${g.t1 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="t2_${s.absen}" value="${g.t2 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="t3_${s.absen}" value="${g.t3 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="t4_${s.absen}" value="${g.t4 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="uts_${s.absen}" value="${g.uts || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-2 py-2 text-center"><input type="number" id="uas_${s.absen}" value="${g.uas || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${safeAbsen}</td>
+                        <td class="px-3 py-2 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="t1_${safeAbsen}" value="${g.t1 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="t2_${safeAbsen}" value="${g.t2 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="t3_${safeAbsen}" value="${g.t3 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="t4_${safeAbsen}" value="${g.t4 || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="uts_${safeAbsen}" value="${g.uts || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="uas_${safeAbsen}" value="${g.uas || ''}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
                     </tr>`;
             });
         };
@@ -990,13 +1020,14 @@
             let gradeData = {};
 
             listSiswa.forEach(s => {
+                const safeAbsen = escapeHTML(s.absen);
                 gradeData[s.absen] = {
-                    t1: document.getElementById(`t1_${s.absen}`).value,
-                    t2: document.getElementById(`t2_${s.absen}`).value,
-                    t3: document.getElementById(`t3_${s.absen}`).value,
-                    t4: document.getElementById(`t4_${s.absen}`).value,
-                    uts: document.getElementById(`uts_${s.absen}`).value,
-                    uas: document.getElementById(`uas_${s.absen}`).value
+                    t1: document.getElementById(`t1_${safeAbsen}`)?.value || '',
+                    t2: document.getElementById(`t2_${safeAbsen}`)?.value || '',
+                    t3: document.getElementById(`t3_${safeAbsen}`)?.value || '',
+                    t4: document.getElementById(`t4_${safeAbsen}`)?.value || '',
+                    uts: document.getElementById(`uts_${safeAbsen}`)?.value || '',
+                    uas: document.getElementById(`uas_${safeAbsen}`)?.value || ''
                 };
             });
 
@@ -1013,15 +1044,16 @@
             if(listSiswa.length === 0) return alert('Tidak ada data siswa untuk diunduh.');
 
             const excelData = listSiswa.map(s => {
+                const safeAbsen = escapeHTML(s.absen);
                 return {
                     "No.": s.absen,
                     "Nama Siswa": s.nama,
-                    "Tugas 1": document.getElementById(`t1_${s.absen}`)?.value || '',
-                    "Tugas 2": document.getElementById(`t2_${s.absen}`)?.value || '',
-                    "Tugas 3": document.getElementById(`t3_${s.absen}`)?.value || '',
-                    "Tugas 4": document.getElementById(`t4_${s.absen}`)?.value || '',
-                    "UTS": document.getElementById(`uts_${s.absen}`)?.value || '',
-                    "UAS": document.getElementById(`uas_${s.absen}`)?.value || ''
+                    "Tugas 1": document.getElementById(`t1_${safeAbsen}`)?.value || '',
+                    "Tugas 2": document.getElementById(`t2_${safeAbsen}`)?.value || '',
+                    "Tugas 3": document.getElementById(`t3_${safeAbsen}`)?.value || '',
+                    "Tugas 4": document.getElementById(`t4_${safeAbsen}`)?.value || '',
+                    "UTS": document.getElementById(`uts_${safeAbsen}`)?.value || '',
+                    "UAS": document.getElementById(`uas_${safeAbsen}`)?.value || ''
                 };
             });
 
@@ -1055,8 +1087,8 @@
 
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
-                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${s.absen}</td>
-                        <td class="px-3 py-2 text-slate-200 font-medium">${s.nama}</td>
+                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${escapeHTML(s.absen)}</td>
+                        <td class="px-3 py-2 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
                         <td class="px-3 py-2 text-center font-bold text-emerald-400">${h}</td>
                         <td class="px-3 py-2 text-center font-bold text-amber-400">${st}</td>
                         <td class="px-3 py-2 text-center font-bold text-sky-400">${i}</td>
