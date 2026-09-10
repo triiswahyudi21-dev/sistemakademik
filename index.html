@@ -68,8 +68,8 @@
             </nav>
         </div>
         <div class="p-4 bg-slate-950/60 border-t border-slate-800/80 text-center text-[10px] text-slate-500 italic shrink-0 flex items-center justify-center gap-2">
-            <span id="syncStatus" class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Firebase Realtime Connected</span>
+            <span id="syncStatus" class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span id="syncText">Menghubungkan ke Firebase...</span>
         </div>
     </aside>
 
@@ -261,7 +261,6 @@
                     </div>
                 </div>
 
-                <!-- TABEL REKAP NILAI (Tugas 1,2,3,4 + UTS + UAS) -->
                 <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
                     <table class="w-full text-left table-auto">
                         <thead class="bg-slate-950 border-b border-slate-800">
@@ -296,7 +295,6 @@
                     </button>
                 </div>
 
-                <!-- TABEL REKAP ABSENSI (H, S, I, A) -->
                 <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
                     <div class="p-4 bg-slate-950/80 border-b border-slate-800">
                         <h4 class="font-bold text-white text-sm flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-400"></i> Rekapitulasi Absensi Kumulatif</h4>
@@ -402,34 +400,45 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE INTEGRATION -->
+    <!-- SCRIPT FIREBASE INTEGRATION & LOCALSTORAGE FALLBACK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // CONFIG FIREBASE
         const firebaseConfig = {
-           apiKey: "AIzaSyAvkKIpUmmGTi7AIODphxlboDghCOyKfnI",
-    authDomain: "sistemakademik-1021a.firebaseapp.com",
-    projectId: "sistemakademik-1021a",
-    storageBucket: "sistemakademik-1021a.firebasestorage.app",
-    messagingSenderId: "937468277943",
-    appId: "1:937468277943:web:ab44f44e961d983fcfc932",
-    measurementId: "G-1KTKMBH6YF"
-  };
+            apiKey: "AIzaSyAvkKIpUmmGTi7AIODphxlboDghCOyKfnI",
+            authDomain: "sistemakademik-1021a.firebaseapp.com",
+            projectId: "sistemakademik-1021a",
+            storageBucket: "sistemakademik-1021a.firebasestorage.app",
+            messagingSenderId: "937468277943",
+            appId: "1:937468277943:web:ab44f44e961d983fcfc932",
+            measurementId: "G-1KTKMBH6YF"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         window.CLASSES = ['7A', '7B', '7C', '7D', '8A', '8B', '8C', '8D', '9A', '9B', '9C', '9D'];
-        window.students = [];
-        window.schedules = {};
-        window.waliKelas = {};
-        window.attendanceDB = {};
-        window.gradesDB = {};
-        window.tapelList = ["2025/2026", "2026/2027"];
+        window.students = JSON.parse(localStorage.getItem('app_students')) || [];
+        window.schedules = JSON.parse(localStorage.getItem('app_schedules')) || {};
+        window.waliKelas = JSON.parse(localStorage.getItem('app_waliKelas')) || {};
+        window.attendanceDB = JSON.parse(localStorage.getItem('app_attendanceDB')) || {};
+        window.gradesDB = JSON.parse(localStorage.getItem('app_gradesDB')) || {};
+        window.tapelList = JSON.parse(localStorage.getItem('app_tapelList')) || ["2025/2026", "2026/2027"];
         window.selectedTapel = "2025/2026";
         window.selectedSemester = "Ganjil";
+
+        function updateSyncStatus(connected) {
+            const statusDot = document.getElementById('syncStatus');
+            const statusText = document.getElementById('syncText');
+            if (connected) {
+                statusDot.className = "inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                statusText.innerText = "Firebase Realtime Connected";
+            } else {
+                statusDot.className = "inline-block w-2 h-2 rounded-full bg-amber-500";
+                statusText.innerText = "Mode Offline (Simpan Lokal)";
+            }
+        }
 
         function formatClassName(inputStr) {
             if(!inputStr) return '7A';
@@ -443,42 +452,69 @@
             return str;
         }
 
-        // Firebase Sync Listeners
+        // Realtime Firebase Listeners + Sync to LocalStorage
+        const connectedRef = ref(db, ".info/connected");
+        onValue(connectedRef, (snap) => {
+            updateSyncStatus(snap.val() === true);
+        });
+
         onValue(ref(db, 'students'), (snapshot) => {
-            window.students = snapshot.val() || [];
-            renderStudents();
-            renderRombelCards();
+            if (snapshot.exists()) {
+                window.students = snapshot.val() || [];
+                localStorage.setItem('app_students', JSON.stringify(window.students));
+                renderStudents();
+                renderRombelCards();
+            }
         });
 
         onValue(ref(db, 'waliKelas'), (snapshot) => {
-            window.waliKelas = snapshot.val() || {};
-            renderWaliKelas();
+            if (snapshot.exists()) {
+                window.waliKelas = snapshot.val() || {};
+                localStorage.setItem('app_waliKelas', JSON.stringify(window.waliKelas));
+                renderWaliKelas();
+            }
         });
 
         onValue(ref(db, 'schedules'), (snapshot) => {
-            window.schedules = snapshot.val() || {};
-            renderJadwal();
+            if (snapshot.exists()) {
+                window.schedules = snapshot.val() || {};
+                localStorage.setItem('app_schedules', JSON.stringify(window.schedules));
+                renderJadwal();
+            }
         });
 
         onValue(ref(db, 'attendanceDB'), (snapshot) => {
-            window.attendanceDB = snapshot.val() || {};
-            if(document.getElementById('tab-absensi').classList.contains('active')) renderAbsensi();
-            if(document.getElementById('tab-rekap-absen').classList.contains('active')) renderHalamanRekap();
+            if (snapshot.exists()) {
+                window.attendanceDB = snapshot.val() || {};
+                localStorage.setItem('app_attendanceDB', JSON.stringify(window.attendanceDB));
+                if(document.getElementById('tab-absensi').classList.contains('active')) renderAbsensi();
+                if(document.getElementById('tab-rekap-absen').classList.contains('active')) renderHalamanRekap();
+            }
         });
 
         onValue(ref(db, 'gradesDB'), (snapshot) => {
-            window.gradesDB = snapshot.val() || {};
-            if(document.getElementById('tab-nilai').classList.contains('active')) renderNilai();
+            if (snapshot.exists()) {
+                window.gradesDB = snapshot.val() || {};
+                localStorage.setItem('app_gradesDB', JSON.stringify(window.gradesDB));
+                if(document.getElementById('tab-nilai').classList.contains('active')) renderNilai();
+            }
         });
 
         onValue(ref(db, 'tapelList'), (snapshot) => {
-            const val = snapshot.val();
-            if(val && Array.isArray(val)) window.tapelList = val;
-            renderTapelDropdown();
+            if (snapshot.exists()) {
+                const val = snapshot.val();
+                if(val && Array.isArray(val)) window.tapelList = val;
+                localStorage.setItem('app_tapelList', JSON.stringify(window.tapelList));
+                renderTapelDropdown();
+            }
         });
 
         window.saveToFirebase = function(path, data) {
-            set(ref(db, path), data);
+            const key = 'app_' + path.split('/')[0];
+            localStorage.setItem(key, JSON.stringify(data));
+            set(ref(db, path), data).catch(err => {
+                console.warn("Gagal menyimpan ke Firebase:", err);
+            });
         };
 
         window.addEventListener('load', () => {
@@ -489,6 +525,10 @@
             populateSelectors();
             renderTapelDropdown();
             document.getElementById('topbarSemester').value = window.selectedSemester;
+            
+            renderStudents();
+            renderRombelCards();
+            renderWaliKelas();
         });
 
         window.toggleSidebar = function() {
@@ -605,6 +645,7 @@
             window.selectedTapel = tapelBaru;
             saveToFirebase('tapelList', window.tapelList);
             renderModalTapelList();
+            renderTapelDropdown();
             document.getElementById('formTapelBaru').value = '';
         };
 
@@ -616,6 +657,7 @@
                 }
                 saveToFirebase('tapelList', window.tapelList);
                 renderModalTapelList();
+                renderTapelDropdown();
             }
         };
 
@@ -640,6 +682,9 @@
                 return parseInt(a.absen) - parseInt(b.absen);
             });
 
+            window.students = updatedStudents;
+            renderStudents();
+            renderRombelCards();
             saveToFirebase('students', updatedStudents);
         }
 
@@ -676,7 +721,7 @@
                 });
 
                 updateStudentsInFirebase(dataBaru, kelasYangDiUpload);
-                alert(`Data berhasil disimpan ke Firebase! Kelas terisi: ${kelasYangDiUpload.join(', ')}.`);
+                alert(`Data berhasil disimpan! Kelas terisi: ${kelasYangDiUpload.join(', ')}.`);
                 e.target.value = '';
                 document.getElementById('fileNameDisplay').innerText = 'Klik untuk upload file Excel (.xlsx)';
             };
@@ -729,6 +774,9 @@
 
             if(opsi.toUpperCase() === 'SEMUA') {
                 if(confirm('Hapus SELURUH data siswa?')) {
+                    window.students = [];
+                    renderStudents();
+                    renderRombelCards();
                     saveToFirebase('students', []);
                 }
             } else {
@@ -736,6 +784,9 @@
                 if(CLASSES.includes(kelasTarget)) {
                     if(confirm(`Hapus seluruh siswa kelas ${kelasTarget}?`)) {
                         let updated = window.students.filter(s => s.kelas !== kelasTarget);
+                        window.students = updated;
+                        renderStudents();
+                        renderRombelCards();
                         saveToFirebase('students', updated);
                     }
                 } else {
@@ -807,6 +858,7 @@
             if(!nama) return alert('Nama Wali Kelas Wajib diisi');
 
             window.waliKelas[cls] = { nama, nip };
+            renderWaliKelas();
             saveToFirebase('waliKelas', window.waliKelas);
             closeModalWali();
         };
@@ -825,6 +877,7 @@
             if(!window.schedules[cls]) window.schedules[cls] = [];
             window.schedules[cls].push({ hari, mapel, jamMulai, jamSelesai });
             
+            renderJadwal();
             saveToFirebase('schedules', window.schedules);
             closeModalJadwal();
         };
@@ -895,11 +948,11 @@
                 if(checkedOption) attData[s.absen] = checkedOption.value;
             });
 
+            window.attendanceDB[key] = attData;
             saveToFirebase(`attendanceDB/${key}`, attData);
-            alert('Absensi berhasil disimpan ke Firebase!');
+            alert('Absensi berhasil disimpan!');
         };
 
-        // RENDER NILAI AKADEMIK (Tugas 1, 2, 3, 4, UTS, UAS)
         window.renderNilai = function() {
             const cls = document.getElementById('nilaiClassFilter').value;
             const mapel = document.getElementById('nilaiMapelFilter').value;
@@ -947,11 +1000,11 @@
                 };
             });
 
+            window.gradesDB[key] = gradeData;
             saveToFirebase(`gradesDB/${key}`, gradeData);
-            alert('Nilai Akademik berhasil disimpan ke Firebase!');
+            alert('Nilai Akademik berhasil disimpan!');
         };
 
-        // DOWNLOAD EXCEL REKAP NILAI
         window.downloadExcelNilai = function() {
             const cls = document.getElementById('nilaiClassFilter').value;
             const mapel = document.getElementById('nilaiMapelFilter').value;
@@ -978,7 +1031,6 @@
             XLSX.writeFile(workbook, `Rekap_Nilai_${mapel}_Kelas_${cls}.xlsx`);
         };
 
-        // RENDER HALAMAN REKAP ABSENSI (H, S, I, A)
         window.renderHalamanRekap = function() {
             const cls = document.getElementById('rekapAbsenClassFilter').value;
             const body = document.getElementById('halamanRekapTableBody');
@@ -1013,7 +1065,6 @@
             });
         };
 
-        // DOWNLOAD EXCEL REKAP ABSENSI
         window.downloadExcelRekapAbsen = function() {
             const cls = document.getElementById('rekapAbsenClassFilter').value;
             const listSiswa = window.students.filter(s => s.kelas === cls);
