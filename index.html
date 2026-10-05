@@ -107,7 +107,6 @@
             
             <!-- TAB SISWA -->
             <section id="tab-siswa" class="tab-content active space-y-6">
-                
                 <!-- RINGKASAN STATISTIK KESELURUHAN SISWA -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex items-center gap-4">
@@ -139,7 +138,7 @@
                     </div>
                 </div>
 
-                <!-- TABLE REKAP DATA PERKELAS (7ABCD, 8ABCD, 9ABCD) -->
+                <!-- TABLE REKAP DATA PERKELAS -->
                 <div class="bg-slate-900 rounded-2xl border border-slate-800 p-5 space-y-3">
                     <h4 class="text-sm font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-table text-emerald-400"></i> Rekapitulasi Siswa per Kelas (7A-7D, 8A-8D, 9A-9D)
@@ -275,6 +274,7 @@
                                 <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase w-28">Hari</th>
                                 <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase w-36">Waktu</th>
                                 <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase">Mata Pelajaran</th>
+                                <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase w-28 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="jadwalTableBody" class="divide-y divide-slate-800/60 text-xs"></tbody>
@@ -340,6 +340,7 @@
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-20">Tugas 2</th>
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-20">Tugas 3</th>
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-20">Tugas 4</th>
+                                <th class="px-2 py-3 text-xs font-bold text-emerald-400 uppercase text-center w-20">UH</th>
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-20">UTS</th>
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-20">UAS</th>
                             </tr>
@@ -380,7 +381,7 @@
         </div>
     </main>
 
-    <!-- MODAL TAMBAH SISWA MANUAL (SISWA MASUK) -->
+    <!-- MODAL TAMBAH SISWA MANUAL -->
     <div id="modalTambahSiswa" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 lg:p-8 w-full max-w-[450px]">
             <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-user-plus text-emerald-400 mr-2"></i>Tambah Siswa Baru</h3>
@@ -489,7 +490,7 @@
         </div>
     </div>
 
-    <!-- MODAL JADWAL -->
+    <!-- MODAL TAMBAH JADWAL -->
     <div id="modalJadwal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 lg:p-8 w-full max-w-[450px]">
             <h3 class="text-xl font-bold text-white mb-6">Tambah Jadwal Pelajaran</h3>
@@ -522,21 +523,55 @@
         </div>
     </div>
 
+    <!-- MODAL EDIT JADWAL -->
+    <div id="modalEditJadwal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 lg:p-8 w-full max-w-[450px]">
+            <h3 class="text-xl font-bold text-white mb-6">Edit Jadwal Pelajaran</h3>
+            <input type="hidden" id="editJadwalIndex">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Hari</label>
+                    <select id="editFormHari" class="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 text-xs">
+                        <option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option><option>Sabtu</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Mata Pelajaran</label>
+                    <input type="text" id="editFormMapel" class="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 text-xs">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">Jam Mulai</label>
+                        <input type="time" id="editFormJamMulai" class="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">Jam Selesai</label>
+                        <input type="time" id="editFormJamSelesai" class="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 text-xs">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 flex gap-3">
+                <button onclick="closeModalEditJadwal()" class="flex-1 py-2.5 text-slate-400 font-bold hover:bg-slate-800 rounded-xl text-xs transition-all">Batal</button>
+                <button onclick="submitEditJadwal()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all">Perbarui</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT FIREBASE INTEGRATION & SINKRONISASI REAL-TIME ONLINE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
-  apiKey: "AIzaSyAvkKIpUmmGTi7AIODphxlboDghCOyKfnI",
-  authDomain: "sistemakademik-1021a.firebaseapp.com",
-  databaseURL: "https://sistemakademik-1021a-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "sistemakademik-1021a",
-  storageBucket: "sistemakademik-1021a.firebasestorage.app",
-  messagingSenderId: "937468277943",
-  appId: "1:937468277943:web:ab44f44e961d983fcfc932",
-  measurementId: "G-1KTKMBH6YF"
-};
+          apiKey: "AIzaSyAvkKIpUmmGTi7AIODphxlboDghCOyKfnI",
+          authDomain: "sistemakademik-1021a.firebaseapp.com",
+          databaseURL: "https://sistemakademik-1021a-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "sistemakademik-1021a",
+          storageBucket: "sistemakademik-1021a.firebasestorage.app",
+          messagingSenderId: "937468277943",
+          appId: "1:937468277943:web:ab44f44e961d983fcfc932",
+          measurementId: "G-1KTKMBH6YF"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -716,6 +751,7 @@
             if(id === 'absensi') renderAbsensi();
             if(id === 'nilai') renderNilai();
             if(id === 'rekap-absen') renderHalamanRekap();
+            if(id === 'jadwal') renderJadwal();
         };
 
         window.switchImportMethod = function(method) {
@@ -948,7 +984,7 @@
             document.getElementById('pasteInput').value = '';
         };
 
-        // TAMBAH SISWA MANUAL (SISWA MASUK)
+        // TAMBAH SISWA MANUAL
         window.openModalTambahSiswa = function() {
             document.getElementById('addSiswaAbsen').value = '';
             document.getElementById('addSiswaNama').value = '';
@@ -972,7 +1008,6 @@
             const newStudent = { id: generateId(), absen, nama, jk, kelas };
             window.students.push(newStudent);
 
-            // Urutkan ulang
             window.students.sort((a, b) => {
                 if (a.kelas !== b.kelas) return a.kelas.localeCompare(b.kelas, undefined, {numeric: true});
                 return (parseInt(a.absen)||0) - (parseInt(b.absen)||0);
@@ -1026,7 +1061,7 @@
             closeModalEditSiswa();
         };
 
-        // HAPUS SISWA (SISWA KELUAR)
+        // HAPUS SISWA
         window.deleteStudent = function(id) {
             const student = window.students.find(s => s.id === id);
             if(!student) return;
@@ -1070,12 +1105,11 @@
             }
         };
 
-        // RENDER DAN KALKULASI REKAPITULASI KESELURUHAN SISWA
+        // RENDER SISWA
         window.renderStudents = function() {
             const body = document.getElementById('siswaTableBody');
             const filterClassVal = document.getElementById('siswaFilterKelas')?.value || 'SEMUA';
             
-            // Hitung statistik statistik umum
             const totalSiswa = window.students.length;
             const totalL = window.students.filter(s => s.jk === 'L').length;
             const totalP = window.students.filter(s => s.jk === 'P').length;
@@ -1084,7 +1118,6 @@
             document.getElementById('statTotalL').innerText = totalL;
             document.getElementById('statTotalP').innerText = totalP;
 
-            // Render Rekap Rincian L dan P Kelas 7ABCD, 8ABCD, 9ABCD
             const targetClasses = ['7A', '7B', '7C', '7D', '8A', '8B', '8C', '8D', '9A', '9B', '9C', '9D'];
             const rekapBody = document.getElementById('rekapKelasTableBody');
             
@@ -1113,7 +1146,6 @@
 
             if(rekapBody) rekapBody.innerHTML = rowL + rowP + rowTotal;
 
-            // Filter Tampilan Siswa
             let filteredSiswa = window.students;
             if(filterClassVal !== 'SEMUA') {
                 filteredSiswa = window.students.filter(s => s.kelas === filterClassVal);
@@ -1200,6 +1232,7 @@
             closeModalWali();
         };
 
+        // --- FITUR JADWAL (TAMBAH, EDIT, HAPUS) ---
         window.openModalJadwal = function() { document.getElementById('modalJadwal').classList.remove('hidden'); };
         window.closeModalJadwal = function() { document.getElementById('modalJadwal').classList.add('hidden'); };
         window.submitJadwal = function() {
@@ -1219,6 +1252,54 @@
             closeModalJadwal();
         };
 
+        window.openModalEditJadwal = function(index) {
+            const cls = document.getElementById('jadwalClassFilter').value;
+            const item = window.schedules[cls] ? window.schedules[cls][index] : null;
+            if(!item) return;
+
+            document.getElementById('editJadwalIndex').value = index;
+            document.getElementById('editFormHari').value = item.hari || 'Senin';
+            document.getElementById('editFormMapel').value = item.mapel || '';
+            document.getElementById('editFormJamMulai').value = item.jamMulai || '';
+            document.getElementById('editFormJamSelesai').value = item.jamSelesai || '';
+
+            document.getElementById('modalEditJadwal').classList.remove('hidden');
+        };
+
+        window.closeModalEditJadwal = function() {
+            document.getElementById('modalEditJadwal').classList.add('hidden');
+        };
+
+        window.submitEditJadwal = function() {
+            const cls = document.getElementById('jadwalClassFilter').value;
+            const index = document.getElementById('editJadwalIndex').value;
+            const hari = document.getElementById('editFormHari').value;
+            const mapel = cleanValue(document.getElementById('editFormMapel').value);
+            const jamMulai = document.getElementById('editFormJamMulai').value;
+            const jamSelesai = document.getElementById('editFormJamSelesai').value;
+
+            if(!mapel) return alert('Mata Pelajaran wajib diisi!');
+
+            if(window.schedules[cls] && window.schedules[cls][index]) {
+                window.schedules[cls][index] = { hari, mapel, jamMulai, jamSelesai };
+                renderJadwal();
+                saveToFirebase('schedules', window.schedules);
+                closeModalEditJadwal();
+            }
+        };
+
+        window.deleteJadwal = function(index) {
+            const cls = document.getElementById('jadwalClassFilter').value;
+            if(window.schedules[cls] && window.schedules[cls][index]) {
+                const item = window.schedules[cls][index];
+                if(confirm(`Hapus jadwal ${item.mapel} (Hari ${item.hari})?`)) {
+                    window.schedules[cls].splice(index, 1);
+                    renderJadwal();
+                    saveToFirebase('schedules', window.schedules);
+                }
+            }
+        };
+
         window.renderJadwal = function() {
             const cls = document.getElementById('jadwalClassFilter').value;
             const body = document.getElementById('jadwalTableBody');
@@ -1226,19 +1307,30 @@
             body.innerHTML = '';
             const list = window.schedules[cls] || [];
             if(list.length === 0) {
-                body.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-xs text-slate-500 italic">Belum ada jadwal untuk kelas ini.</td></tr>';
+                body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-500 italic">Belum ada jadwal untuk kelas ini.</td></tr>';
                 return;
             }
-            list.forEach(j => {
+            list.forEach((j, idx) => {
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
                         <td class="px-4 py-2.5 font-bold text-emerald-400">${escapeHTML(j.hari)}</td>
                         <td class="px-4 py-2.5 text-slate-400 font-mono">${escapeHTML(j.jamMulai)} - ${escapeHTML(j.jamSelesai)}</td>
                         <td class="px-4 py-2.5 text-slate-200 font-medium">${escapeHTML(j.mapel)}</td>
+                        <td class="px-4 py-2.5 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="openModalEditJadwal(${idx})" title="Edit Jadwal" class="w-7 h-7 bg-amber-950/60 border border-amber-800/50 text-amber-400 rounded-lg hover:bg-amber-900/60 transition-all flex items-center justify-center">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
+                                <button onclick="deleteJadwal(${idx})" title="Hapus Jadwal" class="w-7 h-7 bg-rose-950/60 border border-rose-800/50 text-rose-400 rounded-lg hover:bg-rose-900/60 transition-all flex items-center justify-center">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>`;
             });
         };
 
+        // --- ABSENSI ---
         window.renderAbsensi = function() {
             const cls = document.getElementById('absensiClassFilter').value;
             const date = document.getElementById('absensiDate').value;
@@ -1292,6 +1384,7 @@
             alert('Absensi berhasil disimpan!');
         };
 
+        // --- NILAI AKADEMIK (TERMASUK KOLOM ULANGAN HARIAN/UH) ---
         window.renderNilai = function() {
             const cls = document.getElementById('nilaiClassFilter').value;
             const mapel = document.getElementById('nilaiMapelFilter').value;
@@ -1299,13 +1392,13 @@
             if(!body) return;
 
             const listSiswa = window.students.filter(s => s.kelas === cls);
-            body.innerHTML = listSiswa.length === 0 ? '<tr><td colspan="8" class="p-6 text-center text-slate-500 italic">Tidak ada siswa di kelas ini.</td></tr>' : '';
+            body.innerHTML = listSiswa.length === 0 ? '<tr><td colspan="9" class="p-6 text-center text-slate-500 italic">Tidak ada siswa di kelas ini.</td></tr>' : '';
 
             const key = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${mapel}`;
             const currentGrades = window.gradesDB[key] || {};
 
             listSiswa.forEach(s => {
-                const g = currentGrades[s.absen] || { t1: '', t2: '', t3: '', t4: '', uts: '', uas: '' };
+                const g = currentGrades[s.absen] || { t1: '', t2: '', t3: '', t4: '', uh: '', uts: '', uas: '' };
                 const safeAbsen = escapeHTML(s.absen);
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
@@ -1315,6 +1408,7 @@
                         <td class="px-2 py-2 text-center"><input type="number" id="t2_${safeAbsen}" value="${escapeHTML(g.t2 || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
                         <td class="px-2 py-2 text-center"><input type="number" id="t3_${safeAbsen}" value="${escapeHTML(g.t3 || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
                         <td class="px-2 py-2 text-center"><input type="number" id="t4_${safeAbsen}" value="${escapeHTML(g.t4 || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                        <td class="px-2 py-2 text-center"><input type="number" id="uh_${safeAbsen}" value="${escapeHTML(g.uh || '')}" class="w-14 bg-slate-950 border border-emerald-800/80 rounded p-1 text-center text-emerald-300 font-extrabold outline-none focus:border-emerald-500"></td>
                         <td class="px-2 py-2 text-center"><input type="number" id="uts_${safeAbsen}" value="${escapeHTML(g.uts || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
                         <td class="px-2 py-2 text-center"><input type="number" id="uas_${safeAbsen}" value="${escapeHTML(g.uas || '')}" class="w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
                     </tr>`;
@@ -1336,6 +1430,7 @@
                     t2: document.getElementById(`t2_${safeAbsen}`)?.value || '',
                     t3: document.getElementById(`t3_${safeAbsen}`)?.value || '',
                     t4: document.getElementById(`t4_${safeAbsen}`)?.value || '',
+                    uh: document.getElementById(`uh_${safeAbsen}`)?.value || '',
                     uts: document.getElementById(`uts_${safeAbsen}`)?.value || '',
                     uas: document.getElementById(`uas_${safeAbsen}`)?.value || ''
                 };
@@ -1362,6 +1457,7 @@
                     "Tugas 2": document.getElementById(`t2_${safeAbsen}`)?.value || '',
                     "Tugas 3": document.getElementById(`t3_${safeAbsen}`)?.value || '',
                     "Tugas 4": document.getElementById(`t4_${safeAbsen}`)?.value || '',
+                    "UH": document.getElementById(`uh_${safeAbsen}`)?.value || '',
                     "UTS": document.getElementById(`uts_${safeAbsen}`)?.value || '',
                     "UAS": document.getElementById(`uas_${safeAbsen}`)?.value || ''
                 };
@@ -1373,6 +1469,7 @@
             XLSX.writeFile(workbook, `Rekap_Nilai_${mapel}_Kelas_${cls}.xlsx`);
         };
 
+        // --- REKAP ABSEN ---
         window.renderHalamanRekap = function() {
             const cls = document.getElementById('rekapAbsenClassFilter').value;
             const body = document.getElementById('halamanRekapTableBody');
