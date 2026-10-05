@@ -261,9 +261,29 @@
 
             <!-- TAB JADWAL -->
             <section id="tab-jadwal" class="tab-content space-y-6">
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-slate-900 p-6 rounded-2xl border border-slate-800">
-                    <select id="jadwalClassFilter" onchange="renderJadwal()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm font-bold text-slate-200 outline-none focus:border-emerald-500"></select>
-                    <button onclick="openModalJadwal()" class="sm:ml-auto bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-900 p-6 rounded-2xl border border-slate-800">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-slate-400"><i class="fa-solid fa-calendar-day text-emerald-400 mr-1"></i>Hari:</label>
+                            <select id="jadwalDayFilter" onchange="renderJadwal()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm font-bold text-emerald-400 outline-none focus:border-emerald-500">
+                                <option value="HARI_INI">Hari Ini (Otomatis)</option>
+                                <option value="SEMUA">Semua Hari</option>
+                                <option value="Senin">Senin</option>
+                                <option value="Selasa">Selasa</option>
+                                <option value="Rabu">Rabu</option>
+                                <option value="Kamis">Kamis</option>
+                                <option value="Jumat">Jumat</option>
+                                <option value="Sabtu">Sabtu</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-slate-400"><i class="fa-solid fa-door-open text-emerald-400 mr-1"></i>Kelas:</label>
+                            <select id="jadwalClassFilter" onchange="renderJadwal()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm font-bold text-slate-200 outline-none focus:border-emerald-500">
+                                <option value="SEMUA">Semua Kelas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="openModalJadwal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0">
                         <i class="fa-solid fa-plus mr-2"></i>Tambah Jadwal
                     </button>
                 </div>
@@ -271,6 +291,7 @@
                     <table class="w-full text-left table-auto">
                         <thead class="bg-slate-950 border-b border-slate-800">
                             <tr>
+                                <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase w-24 text-center">Kelas</th>
                                 <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase w-28">Hari</th>
                                 <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase w-36">Waktu</th>
                                 <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase">Mata Pelajaran</th>
@@ -496,6 +517,10 @@
             <h3 class="text-xl font-bold text-white mb-6">Tambah Jadwal Pelajaran</h3>
             <div class="space-y-4">
                 <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Kelas</label>
+                    <select id="formKelasJadwal" class="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 text-xs"></select>
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1">Hari</label>
                     <select id="formHari" class="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 text-xs">
                         <option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option><option>Sabtu</option>
@@ -527,6 +552,7 @@
     <div id="modalEditJadwal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 lg:p-8 w-full max-w-[450px]">
             <h3 class="text-xl font-bold text-white mb-6">Edit Jadwal Pelajaran</h3>
+            <input type="hidden" id="editJadwalClass">
             <input type="hidden" id="editJadwalIndex">
             <div class="space-y-4">
                 <div>
@@ -603,6 +629,11 @@
             const combined = Array.from(new Set([...window.defaultClasses, ...studentClasses]));
             combined.sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
             return combined;
+        };
+
+        window.getHariIni = function() {
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            return days[new Date().getDay()];
         };
 
         window.students = JSON.parse(localStorage.getItem('app_students')) || [];
@@ -861,8 +892,19 @@
                 filterSiswa.value = currFilter;
             }
 
+            // Populate selector tab jadwal (tambah opsi SEMUA kelas)
+            const selJadwal = document.getElementById('jadwalClassFilter');
+            if(selJadwal) {
+                const currentVal = selJadwal.value || 'SEMUA';
+                selJadwal.innerHTML = '<option value="SEMUA">Semua Kelas</option>';
+                classes.forEach(cls => {
+                    selJadwal.innerHTML += `<option value="${escapeHTML(cls)}">${escapeHTML(cls)}</option>`;
+                });
+                selJadwal.value = currentVal;
+            }
+
             // Populate selector tab lainnya
-            ['jadwalClassFilter', 'absensiClassFilter', 'nilaiClassFilter', 'rekapAbsenClassFilter', 'formWaliKelas'].forEach(selId => {
+            ['absensiClassFilter', 'nilaiClassFilter', 'rekapAbsenClassFilter', 'formWaliKelas', 'formKelasJadwal'].forEach(selId => {
                 const sel = document.getElementById(selId);
                 if(sel) {
                     const currentVal = sel.value;
@@ -1232,11 +1274,15 @@
             closeModalWali();
         };
 
-        // --- FITUR JADWAL (TAMBAH, EDIT, HAPUS) ---
-        window.openModalJadwal = function() { document.getElementById('modalJadwal').classList.remove('hidden'); };
+        // --- FITUR JADWAL (PENCARIAN BERDASARKAN HARI & KELAS) ---
+        window.openModalJadwal = function() { 
+            populateSelectors();
+            document.getElementById('modalJadwal').classList.remove('hidden'); 
+        };
         window.closeModalJadwal = function() { document.getElementById('modalJadwal').classList.add('hidden'); };
+        
         window.submitJadwal = function() {
-            const cls = document.getElementById('jadwalClassFilter').value;
+            const cls = document.getElementById('formKelasJadwal').value;
             const hari = document.getElementById('formHari').value;
             const mapel = cleanValue(document.getElementById('formMapel').value);
             const jamMulai = document.getElementById('formJamMulai').value;
@@ -1252,11 +1298,11 @@
             closeModalJadwal();
         };
 
-        window.openModalEditJadwal = function(index) {
-            const cls = document.getElementById('jadwalClassFilter').value;
+        window.openModalEditJadwal = function(cls, index) {
             const item = window.schedules[cls] ? window.schedules[cls][index] : null;
             if(!item) return;
 
+            document.getElementById('editJadwalClass').value = cls;
             document.getElementById('editJadwalIndex').value = index;
             document.getElementById('editFormHari').value = item.hari || 'Senin';
             document.getElementById('editFormMapel').value = item.mapel || '';
@@ -1271,7 +1317,7 @@
         };
 
         window.submitEditJadwal = function() {
-            const cls = document.getElementById('jadwalClassFilter').value;
+            const cls = document.getElementById('editJadwalClass').value;
             const index = document.getElementById('editJadwalIndex').value;
             const hari = document.getElementById('editFormHari').value;
             const mapel = cleanValue(document.getElementById('editFormMapel').value);
@@ -1288,11 +1334,10 @@
             }
         };
 
-        window.deleteJadwal = function(index) {
-            const cls = document.getElementById('jadwalClassFilter').value;
+        window.deleteJadwal = function(cls, index) {
             if(window.schedules[cls] && window.schedules[cls][index]) {
                 const item = window.schedules[cls][index];
-                if(confirm(`Hapus jadwal ${item.mapel} (Hari ${item.hari})?`)) {
+                if(confirm(`Hapus jadwal ${item.mapel} (Kelas ${cls} - Hari ${item.hari})?`)) {
                     window.schedules[cls].splice(index, 1);
                     renderJadwal();
                     saveToFirebase('schedules', window.schedules);
@@ -1301,27 +1346,58 @@
         };
 
         window.renderJadwal = function() {
-            const cls = document.getElementById('jadwalClassFilter').value;
+            const dayFilter = document.getElementById('jadwalDayFilter')?.value || 'HARI_INI';
+            const classFilter = document.getElementById('jadwalClassFilter')?.value || 'SEMUA';
             const body = document.getElementById('jadwalTableBody');
             if(!body) return;
             body.innerHTML = '';
-            const list = window.schedules[cls] || [];
-            if(list.length === 0) {
-                body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-500 italic">Belum ada jadwal untuk kelas ini.</td></tr>';
+
+            let targetHari = dayFilter;
+            if(dayFilter === 'HARI_INI') {
+                targetHari = window.getHariIni();
+            }
+
+            let allSchedulesList = [];
+            const classesToScan = classFilter === 'SEMUA' ? window.getAllClasses() : [classFilter];
+
+            classesToScan.forEach(cls => {
+                const list = window.schedules[cls] || [];
+                list.forEach((j, originalIndex) => {
+                    if(targetHari === 'SEMUA' || j.hari === targetHari) {
+                        allSchedulesList.push({
+                            kelas: cls,
+                            hari: j.hari,
+                            jamMulai: j.jamMulai,
+                            jamSelesai: j.jamSelesai,
+                            mapel: j.mapel,
+                            originalIndex: originalIndex
+                        });
+                    }
+                });
+            });
+
+            // Urutkan berdasarkan Waktu / Jam Mulai
+            allSchedulesList.sort((a, b) => (a.jamMulai || '').localeCompare(b.jamMulai || ''));
+
+            if(allSchedulesList.length === 0) {
+                const infoHari = dayFilter === 'HARI_INI' ? `hari ini (${targetHari})` : (dayFilter === 'SEMUA' ? 'saat ini' : `hari ${dayFilter}`);
+                body.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-xs text-slate-500 italic">Tidak ada jadwal pelajaran ditemukan untuk ${infoHari}.</td></tr>`;
                 return;
             }
-            list.forEach((j, idx) => {
+
+            allSchedulesList.forEach((j) => {
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
-                        <td class="px-4 py-2.5 font-bold text-emerald-400">${escapeHTML(j.hari)}</td>
-                        <td class="px-4 py-2.5 text-slate-400 font-mono">${escapeHTML(j.jamMulai)} - ${escapeHTML(j.jamSelesai)}</td>
-                        <td class="px-4 py-2.5 text-slate-200 font-medium">${escapeHTML(j.mapel)}</td>
+                        <td class="px-4 py-2.5 text-center"><span class="bg-emerald-950 border border-emerald-800/60 text-emerald-400 font-bold px-2 py-0.5 rounded-md">${escapeHTML(j.kelas)}</span></td>
+                        <td class="px-4 py-2.5 font-bold text-amber-400">${escapeHTML(j.hari)}</td>
+                        <td class="px-4 py-2.5 text-slate-300 font-mono">${escapeHTML(j.jamMulai || '--:--')} - ${escapeHTML(j.jamSelesai || '--:--')}</td>
+                        <td class="px-4 py-2.5 text-slate-100 font-semibold">${escapeHTML(j.mapel)}</td>
                         <td class="px-4 py-2.5 text-center">
                             <div class="flex items-center justify-center gap-1.5">
-                                <button onclick="openModalEditJadwal(${idx})" title="Edit Jadwal" class="w-7 h-7 bg-amber-950/60 border border-amber-800/50 text-amber-400 rounded-lg hover:bg-amber-900/60 transition-all flex items-center justify-center">
+                                <button onclick="openModalEditJadwal('${j.kelas}', ${j.originalIndex})" title="Edit Jadwal" class="w-7 h-7 bg-amber-950/60 border border-amber-800/50 text-amber-400 rounded-lg hover:bg-amber-900/60 transition-all flex items-center justify-center">
                                     <i class="fa-solid fa-pen-to-square text-xs"></i>
                                 </button>
-                                <button onclick="deleteJadwal(${idx})" title="Hapus Jadwal" class="w-7 h-7 bg-rose-950/60 border border-rose-800/50 text-rose-400 rounded-lg hover:bg-rose-900/60 transition-all flex items-center justify-center">
+                                <button onclick="deleteJadwal('${j.kelas}', ${j.originalIndex})" title="Hapus Jadwal" class="w-7 h-7 bg-rose-950/60 border border-rose-800/50 text-rose-400 rounded-lg hover:bg-rose-900/60 transition-all flex items-center justify-center">
                                     <i class="fa-solid fa-trash-can text-xs"></i>
                                 </button>
                             </div>
