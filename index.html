@@ -106,7 +106,7 @@
             </div>
         </header>
 
-        <!-- KONTAINER KONTEN UTAMA (Ditambahkan pb-24 agar tidak terpotong di HP) -->
+        <!-- KONTAINER KONTEN UTAMA -->
         <div class="flex-1 overflow-y-auto p-3 pb-24 sm:p-6 sm:pb-12 lg:p-8 bg-slate-950 space-y-4 sm:space-y-6">
             
             <!-- TAB SISWA -->
@@ -344,7 +344,7 @@
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800">
                     <select id="absensiClassFilter" onchange="renderAbsensi()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-200 outline-none focus:border-emerald-500"></select>
                     <input type="date" id="absensiDate" onchange="renderAbsensi()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-200 outline-none focus:border-emerald-500">
-                    <button onclick="saveAbsensi()" class="sm:ml-auto bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all">
+                    <button onclick="saveAbsensi()" class="sm:ml-auto bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                         <i class="fa-solid fa-floppy-disk mr-1.5"></i>Simpan Absensi
                     </button>
                 </div>
@@ -427,28 +427,45 @@
                 </div>
             </section>
 
-            <!-- TAB REKAP ABSENSI -->
+            <!-- TAB REKAP ABSENSI PER BULAN -->
             <section id="tab-rekap-absen" class="tab-content space-y-4 sm:space-y-6">
                 <div class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <select id="rekapAbsenClassFilter" onchange="renderHalamanRekap()" class="w-full sm:w-auto bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-200 outline-none focus:border-emerald-500"></select>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                            <label class="text-xs font-bold text-slate-400 whitespace-nowrap"><i class="fa-solid fa-door-open text-emerald-400 mr-1"></i>Kelas:</label>
+                            <select id="rekapAbsenClassFilter" onchange="renderHalamanRekap()" class="bg-transparent text-xs sm:text-sm font-bold text-slate-200 outline-none cursor-pointer"></select>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                            <label class="text-xs font-bold text-slate-400 whitespace-nowrap"><i class="fa-solid fa-calendar-days text-emerald-400 mr-1"></i>Bulan:</label>
+                            <select id="rekapAbsenBulanFilter" onchange="renderHalamanRekap()" class="bg-transparent text-xs sm:text-sm font-bold text-emerald-400 outline-none cursor-pointer">
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Maret</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Juni</option>
+                                <option value="07">Juli</option>
+                                <option value="08">Agustus</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                            <label class="text-xs font-bold text-slate-400 whitespace-nowrap"><i class="fa-solid fa-calendar text-emerald-400 mr-1"></i>Tahun:</label>
+                            <input type="number" id="rekapAbsenTahunFilter" onchange="renderHalamanRekap()" class="w-16 bg-transparent text-xs sm:text-sm font-bold text-slate-200 outline-none" value="2026">
+                        </div>
                     </div>
-                    <button onclick="downloadExcelRekapAbsen()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 justify-center">
+                    <button onclick="downloadExcelRekapAbsen()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 justify-center shrink-0">
                         <i class="fa-solid fa-file-excel"></i> Download Excel
                     </button>
                 </div>
 
                 <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
-                    <table class="w-full text-left table-auto whitespace-nowrap">
+                    <table class="w-full text-left table-auto whitespace-nowrap min-w-max">
                         <thead class="bg-slate-950 border-b border-slate-800">
-                            <tr>
-                                <th class="px-3 py-3 text-xs font-bold text-slate-400 uppercase w-12 text-center">No.</th>
-                                <th class="px-3 py-3 text-xs font-bold text-slate-400 uppercase">Nama Siswa</th>
-                                <th class="px-3 py-3 text-xs font-bold text-emerald-400 uppercase text-center w-16">H</th>
-                                <th class="px-3 py-3 text-xs font-bold text-amber-400 uppercase text-center w-16">S</th>
-                                <th class="px-3 py-3 text-xs font-bold text-sky-400 uppercase text-center w-16">I</th>
-                                <th class="px-3 py-3 text-xs font-bold text-rose-400 uppercase text-center w-16">A</th>
-                            </tr>
+                            <tr id="halamanRekapHeaderRow"></tr>
                         </thead>
                         <tbody id="halamanRekapTableBody" class="divide-y divide-slate-800/60 text-xs"></tbody>
                     </table>
@@ -911,9 +928,19 @@
         };
 
         window.addEventListener('load', () => {
-            const today = new Date().toISOString().split('T')[0];
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
             const absensiDateInput = document.getElementById('absensiDate');
-            if(absensiDateInput) absensiDateInput.value = today;
+            if(absensiDateInput) absensiDateInput.value = dateStr;
+
+            const currBulan = String(today.getMonth() + 1).padStart(2, '0');
+            const currTahun = String(today.getFullYear());
+
+            const selBulan = document.getElementById('rekapAbsenBulanFilter');
+            if(selBulan) selBulan.value = currBulan;
+
+            const inputTahun = document.getElementById('rekapAbsenTahunFilter');
+            if(inputTahun) inputTahun.value = currTahun;
 
             window.sortAndRenumberStudents();
             populateSelectors();
@@ -1093,7 +1120,6 @@
             });
         };
 
-        // KELOLA DATA GURU & KODE GURU
         window.renderTeachers = function() {
             const body = document.getElementById('guruTableBody');
             if(!body) return;
@@ -1550,41 +1576,100 @@
                 const w = window.waliKelas[cls] || { nama: '-', nip: '-' };
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="px-4 py-2.5 font-bold text-emerald-400">${escapeHTML(cls)}</td>
-                        <td class="px-4 py-2.5 text-slate-200 font-medium">${escapeHTML(w.nama)}</td>
-                        <td class="px-4 py-2.5 text-slate-400 font-mono">${escapeHTML(w.nip)}</td>
+                        <td class="px-4 py-3 font-bold text-emerald-400">${escapeHTML(cls)}</td>
+                        <td class="px-4 py-3 text-slate-200 font-medium">${escapeHTML(w.nama)}</td>
+                        <td class="px-4 py-3 text-slate-400 font-mono">${escapeHTML(w.nip)}</td>
                     </tr>`;
             });
         };
 
-        window.openModalWali = function() { document.getElementById('modalWali').classList.remove('hidden'); };
+        window.openModalWali = function() {
+            populateSelectors();
+            document.getElementById('formWaliNama').value = '';
+            document.getElementById('formWaliNip').value = '';
+            document.getElementById('modalWali').classList.remove('hidden');
+        };
         window.closeModalWali = function() { document.getElementById('modalWali').classList.add('hidden'); };
+
         window.submitWali = function() {
-            const cls = document.getElementById('formWaliKelas').value;
+            const kelas = document.getElementById('formWaliKelas').value;
             const nama = cleanValue(document.getElementById('formWaliNama').value);
             const nip = cleanValue(document.getElementById('formWaliNip').value);
-            if(!nama) return alert('Nama Wali Kelas Wajib diisi');
-
-            window.waliKelas[cls] = { nama, nip };
-            renderWaliKelas();
+            if(!nama) return alert('Nama Wali Kelas wajib diisi!');
+            window.waliKelas[kelas] = { nama, nip };
             saveToFirebase('waliKelas', window.waliKelas);
+            renderWaliKelas();
             closeModalWali();
         };
 
-        // JADWAL PELAJARAN
-        window.openModalJadwal = function() { 
+        window.renderJadwal = function() {
+            const body = document.getElementById('jadwalTableBody');
+            if(!body) return;
+            body.innerHTML = '';
+
+            const dayFilter = document.getElementById('jadwalDayFilter')?.value || 'HARI_INI';
+            const classFilter = document.getElementById('jadwalClassFilter')?.value || 'SEMUA';
+            const guruFilter = document.getElementById('jadwalGuruFilter')?.value || 'SEMUA';
+
+            const activeDay = dayFilter === 'HARI_INI' ? getHariIni() : dayFilter;
+
+            let allSchedules = [];
+            Object.keys(window.schedules || {}).forEach(cls => {
+                (window.schedules[cls] || []).forEach((item, index) => {
+                    allSchedules.push({ ...item, kelas: cls, originalIndex: index });
+                });
+            });
+
+            let filtered = allSchedules.filter(s => {
+                if(activeDay !== 'SEMUA' && s.hari !== activeDay) return false;
+                if(classFilter !== 'SEMUA' && s.kelas !== classFilter) return false;
+                if(guruFilter !== 'SEMUA' && s.kodeGuru !== guruFilter) return false;
+                return true;
+            });
+
+            if(filtered.length === 0) {
+                body.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-500 italic">Tidak ada jadwal pelajaran yang sesuai filter.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(s => {
+                body.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="px-3 py-2.5 text-center"><span class="bg-emerald-950 border border-emerald-800/60 text-emerald-400 font-bold px-2 py-0.5 rounded text-xs">${escapeHTML(s.kelas)}</span></td>
+                        <td class="px-3 py-2.5 font-semibold text-slate-200">${escapeHTML(s.hari)}</td>
+                        <td class="px-3 py-2.5 font-mono text-slate-300 text-xs">${escapeHTML(s.jamMulai || '')} - ${escapeHTML(s.jamSelesai || '')}</td>
+                        <td class="px-3 py-2.5 font-medium text-slate-100">${escapeHTML(s.mapel)}</td>
+                        <td class="px-3 py-2.5 text-center font-mono text-emerald-400 font-bold">${escapeHTML(s.kodeGuru || '-')}</td>
+                        <td class="px-3 py-2.5 text-slate-300">${escapeHTML(s.guru)}</td>
+                        <td class="px-3 py-2.5 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="openModalEditJadwal('${s.kelas}', ${s.originalIndex})" class="w-7 h-7 bg-amber-950/60 border border-amber-800/50 text-amber-400 rounded-lg hover:bg-amber-900/60 transition-all flex items-center justify-center">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
+                                <button onclick="deleteJadwal('${s.kelas}', ${s.originalIndex})" class="w-7 h-7 bg-rose-950/60 border border-rose-800/50 text-rose-400 rounded-lg hover:bg-rose-900/60 transition-all flex items-center justify-center">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+        };
+
+        window.openModalJadwal = function() {
             populateSelectors();
             populateGuruSelector();
+            document.getElementById('formSelectGuruData').value = '';
+            document.getElementById('formMapel').value = '';
             document.getElementById('formGuru').value = '';
             document.getElementById('formKodeGuru').value = '';
-            document.getElementById('formMapel').value = '';
-            document.getElementById('formSelectGuruData').value = '';
-            document.getElementById('modalJadwal').classList.remove('hidden'); 
+            document.getElementById('formJamMulai').value = '07:00';
+            document.getElementById('formJamSelesai').value = '08:20';
+            document.getElementById('modalJadwal').classList.remove('hidden');
         };
         window.closeModalJadwal = function() { document.getElementById('modalJadwal').classList.add('hidden'); };
-        
+
         window.submitJadwal = function() {
-            const cls = document.getElementById('formKelasJadwal').value;
+            const kelas = document.getElementById('formKelasJadwal').value;
             const hari = document.getElementById('formHari').value;
             const mapel = cleanValue(document.getElementById('formMapel').value);
             const guru = cleanValue(document.getElementById('formGuru').value);
@@ -1592,24 +1677,22 @@
             const jamMulai = document.getElementById('formJamMulai').value;
             const jamSelesai = document.getElementById('formJamSelesai').value;
 
-            if(!mapel) return alert('Mata Pelajaran wajib diisi!');
+            if(!mapel || !guru) return alert('Mata pelajaran dan Guru wajib diisi!');
 
-            if(!window.schedules[cls]) window.schedules[cls] = [];
-            window.schedules[cls].push({ hari, mapel, guru, kodeGuru, jamMulai, jamSelesai });
-            
+            if(!window.schedules[kelas]) window.schedules[kelas] = [];
+            window.schedules[kelas].push({ hari, mapel, guru, kodeGuru, jamMulai, jamSelesai });
+
             saveToFirebase('schedules', window.schedules);
-            populateGuruSelector();
             renderJadwal();
             closeModalJadwal();
         };
 
-        window.openModalEditJadwal = function(cls, index) {
-            const item = window.schedules[cls] ? window.schedules[cls][index] : null;
+        window.openModalEditJadwal = function(kelas, index) {
+            const item = (window.schedules[kelas] || [])[index];
             if(!item) return;
 
             populateGuruSelector();
-
-            document.getElementById('editJadwalClass').value = cls;
+            document.getElementById('editJadwalClass').value = kelas;
             document.getElementById('editJadwalIndex').value = index;
             document.getElementById('editFormHari').value = item.hari || 'Senin';
             document.getElementById('editFormMapel').value = item.mapel || '';
@@ -1620,145 +1703,78 @@
 
             document.getElementById('modalEditJadwal').classList.remove('hidden');
         };
-
-        window.closeModalEditJadwal = function() {
-            document.getElementById('modalEditJadwal').classList.add('hidden');
-        };
+        window.closeModalEditJadwal = function() { document.getElementById('modalEditJadwal').classList.add('hidden'); };
 
         window.submitEditJadwal = function() {
-            const cls = document.getElementById('editJadwalClass').value;
+            const kelas = document.getElementById('editJadwalClass').value;
             const index = document.getElementById('editJadwalIndex').value;
-            const hari = document.getElementById('editFormHari').value;
-            const mapel = cleanValue(document.getElementById('editFormMapel').value);
-            const guru = cleanValue(document.getElementById('editFormGuru').value);
-            const kodeGuru = cleanValue(document.getElementById('editFormKodeGuru').value).toUpperCase();
-            const jamMulai = document.getElementById('editFormJamMulai').value;
-            const jamSelesai = document.getElementById('editFormJamSelesai').value;
 
-            if(!mapel) return alert('Mata Pelajaran wajib diisi!');
+            if(!window.schedules[kelas] || !window.schedules[kelas][index]) return;
 
-            if(window.schedules[cls] && window.schedules[cls][index]) {
-                window.schedules[cls][index] = { hari, mapel, guru, kodeGuru, jamMulai, jamSelesai };
-                saveToFirebase('schedules', window.schedules);
-                populateGuruSelector();
-                renderJadwal();
-                closeModalEditJadwal();
-            }
+            window.schedules[kelas][index] = {
+                hari: document.getElementById('editFormHari').value,
+                mapel: cleanValue(document.getElementById('editFormMapel').value),
+                guru: cleanValue(document.getElementById('editFormGuru').value),
+                kodeGuru: cleanValue(document.getElementById('editFormKodeGuru').value).toUpperCase(),
+                jamMulai: document.getElementById('editFormJamMulai').value,
+                jamSelesai: document.getElementById('editFormJamSelesai').value
+            };
+
+            saveToFirebase('schedules', window.schedules);
+            renderJadwal();
+            closeModalEditJadwal();
         };
 
-        window.deleteJadwal = function(cls, index) {
-            if(window.schedules[cls] && window.schedules[cls][index]) {
-                const item = window.schedules[cls][index];
-                if(confirm(`Hapus jadwal ${item.mapel} (Kelas ${cls} - Hari ${item.hari})?`)) {
-                    window.schedules[cls].splice(index, 1);
+        window.deleteJadwal = function(kelas, index) {
+            if(confirm('Hapus jadwal pelajaran ini?')) {
+                if(window.schedules[kelas]) {
+                    window.schedules[kelas].splice(index, 1);
                     saveToFirebase('schedules', window.schedules);
-                    populateGuruSelector();
                     renderJadwal();
                 }
             }
         };
 
-        window.renderJadwal = function() {
-            const dayFilter = document.getElementById('jadwalDayFilter')?.value || 'HARI_INI';
-            const classFilter = document.getElementById('jadwalClassFilter')?.value || 'SEMUA';
-            const guruFilter = document.getElementById('jadwalGuruFilter')?.value || 'SEMUA';
-            const body = document.getElementById('jadwalTableBody');
+        // KELOLA ABSENSI HARIAN & REKAP BULANAN
+        window.renderAbsensi = function() {
+            const body = document.getElementById('absensiTableBody');
             if(!body) return;
             body.innerHTML = '';
 
-            let targetHari = dayFilter;
-            if(dayFilter === 'HARI_INI') {
-                targetHari = window.getHariIni();
-            }
+            const kelas = document.getElementById('absensiClassFilter')?.value || window.getAllClasses()[0];
+            const date = document.getElementById('absensiDate')?.value || new Date().toISOString().split('T')[0];
 
-            let allSchedulesList = [];
-            const classesToScan = classFilter === 'SEMUA' ? window.getAllClasses() : [classFilter];
-
-            classesToScan.forEach(cls => {
-                const list = window.schedules[cls] || [];
-                list.forEach((j, originalIndex) => {
-                    const matchHari = (targetHari === 'SEMUA' || j.hari === targetHari);
-                    
-                    let matchGuru = true;
-                    if(guruFilter !== 'SEMUA') {
-                        matchGuru = (j.kodeGuru === guruFilter) || (j.guru && j.guru.toLowerCase().includes(guruFilter.toLowerCase()));
-                    }
-
-                    if(matchHari && matchGuru) {
-                        allSchedulesList.push({
-                            kelas: cls,
-                            hari: j.hari,
-                            jamMulai: j.jamMulai,
-                            jamSelesai: j.jamSelesai,
-                            mapel: j.mapel,
-                            guru: j.guru || '-',
-                            kodeGuru: j.kodeGuru || '-',
-                            originalIndex: originalIndex
-                        });
-                    }
-                });
-            });
-
-            allSchedulesList.sort((a, b) => (a.jamMulai || '').localeCompare(b.jamMulai || ''));
-
-            if(allSchedulesList.length === 0) {
-                const infoHari = dayFilter === 'HARI_INI' ? `hari ini (${targetHari})` : (dayFilter === 'SEMUA' ? 'saat ini' : `hari ${dayFilter}`);
-                body.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-xs text-slate-500 italic">Tidak ada jadwal pelajaran ditemukan untuk filter ini (${infoHari}).</td></tr>`;
+            const classStudents = (window.students || []).filter(s => s.kelas === kelas);
+            if(classStudents.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500 italic">Belum ada siswa di kelas ini.</td></tr>';
                 return;
             }
 
-            allSchedulesList.forEach((j) => {
+            if(!window.attendanceDB) window.attendanceDB = {};
+            const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${date}`;
+            const existing = window.attendanceDB[recordKey] || {};
+
+            classStudents.forEach(s => {
+                const currentStatus = existing[s.id] || 'H';
                 body.innerHTML += `
-                    <tr class="hover:bg-slate-800/40">
-                        <td class="px-3 py-2.5 text-center"><span class="bg-emerald-950 border border-emerald-800/60 text-emerald-400 font-bold px-2 py-0.5 rounded-md">${escapeHTML(j.kelas)}</span></td>
-                        <td class="px-3 py-2.5 font-bold text-amber-400">${escapeHTML(j.hari)}</td>
-                        <td class="px-3 py-2.5 text-slate-300 font-mono">${escapeHTML(j.jamMulai || '--:--')} - ${escapeHTML(j.jamSelesai || '--:--')}</td>
-                        <td class="px-3 py-2.5 text-slate-100 font-semibold">${escapeHTML(j.mapel)}</td>
-                        <td class="px-3 py-2.5 text-center"><span class="bg-slate-950 border border-slate-800 font-mono text-emerald-400 font-bold px-2 py-0.5 rounded">${escapeHTML(j.kodeGuru)}</span></td>
-                        <td class="px-3 py-2.5 text-emerald-300 font-medium">${escapeHTML(j.guru)}</td>
-                        <td class="px-3 py-2.5 text-center">
-                            <div class="flex items-center justify-center gap-1.5">
-                                <button onclick="openModalEditJadwal('${j.kelas}', ${j.originalIndex})" title="Edit Jadwal" class="w-7 h-7 bg-amber-950/60 border border-amber-800/50 text-amber-400 rounded-lg hover:bg-amber-900/60 transition-all flex items-center justify-center">
-                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                </button>
-                                <button onclick="deleteJadwal('${j.kelas}', ${j.originalIndex})" title="Hapus Jadwal" class="w-7 h-7 bg-rose-950/60 border border-rose-800/50 text-rose-400 rounded-lg hover:bg-rose-900/60 transition-all flex items-center justify-center">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>`;
-            });
-        };
-
-        // ABSENSI
-        window.renderAbsensi = function() {
-            const cls = document.getElementById('absensiClassFilter').value;
-            const date = document.getElementById('absensiDate').value;
-            const body = document.getElementById('absensiTableBody');
-            if(!body) return;
-
-            const listSiswa = window.students.filter(s => s.kelas === cls);
-            body.innerHTML = listSiswa.length === 0 ? '<tr><td colspan="4" class="p-6 text-center text-slate-500 italic">Tidak ada siswa di kelas ini.</td></tr>' : '';
-
-            const key = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${date}`;
-            const currentAttendance = window.attendanceDB[key] || {};
-
-            listSiswa.forEach(s => {
-                const status = currentAttendance[s.absen] || 'H';
-                const safeAbsen = escapeHTML(s.absen);
-                body.innerHTML += `
-                    <tr class="hover:bg-slate-800/40">
-                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${safeAbsen}</td>
-                        <td class="px-3 py-2 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
-                        <td class="px-3 py-2 text-center font-bold ${s.jk === 'P' ? 'text-pink-400' : 'text-sky-400'}">${escapeHTML(s.jk || 'L')}</td>
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${escapeHTML(s.absen)}</td>
+                        <td class="px-3 py-2 font-medium text-slate-200">${escapeHTML(s.nama)}</td>
+                        <td class="px-3 py-2 text-center">${s.jk === 'P' ? '<span class="text-pink-400 font-bold">P</span>' : '<span class="text-sky-400 font-bold">L</span>'}</td>
                         <td class="px-3 py-2 text-center">
-                            <div class="flex justify-center gap-2.5 sm:gap-3">
-                                ${['H', 'S', 'I', 'A'].map(opt => `
-                                    <label class="inline-flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" name="att_${safeAbsen}" value="${opt}" ${status === opt ? 'checked' : ''} class="accent-emerald-500">
-                                        <span class="text-xs font-bold ${opt === 'H' ? 'text-emerald-400' : opt === 'S' ? 'text-amber-400' : opt === 'I' ? 'text-sky-400' : 'text-rose-400'}">${opt}</span>
-                                    </label>
-                                `).join('')}
+                            <div class="flex items-center justify-center gap-3">
+                                <label class="flex items-center gap-1 cursor-pointer text-emerald-400 font-bold text-xs">
+                                    <input type="radio" name="abs_${s.id}" value="H" ${currentStatus === 'H' ? 'checked' : ''} class="accent-emerald-500 cursor-pointer"> H
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer text-amber-400 font-bold text-xs">
+                                    <input type="radio" name="abs_${s.id}" value="S" ${currentStatus === 'S' ? 'checked' : ''} class="accent-amber-500 cursor-pointer"> S
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer text-sky-400 font-bold text-xs">
+                                    <input type="radio" name="abs_${s.id}" value="I" ${currentStatus === 'I' ? 'checked' : ''} class="accent-sky-500 cursor-pointer"> I
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer text-rose-400 font-bold text-xs">
+                                    <input type="radio" name="abs_${s.id}" value="A" ${currentStatus === 'A' ? 'checked' : ''} class="accent-rose-500 cursor-pointer"> A
+                                </label>
                             </div>
                         </td>
                     </tr>`;
@@ -1766,278 +1782,326 @@
         };
 
         window.saveAbsensi = function() {
-            const cls = document.getElementById('absensiClassFilter').value;
-            const date = document.getElementById('absensiDate').value;
-            const key = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${date}`;
-            
-            const listSiswa = window.students.filter(s => s.kelas === cls);
-            let attData = {};
+            const classSelect = document.getElementById('absensiClassFilter');
+            const dateSelect = document.getElementById('absensiDate');
 
-            listSiswa.forEach(s => {
-                const safeAbsen = escapeHTML(s.absen);
-                const checkedOption = document.querySelector(`input[name="att_${safeAbsen}"]:checked`);
-                if(checkedOption) attData[s.absen] = checkedOption.value;
+            const kelas = classSelect ? classSelect.value : '';
+            const date = dateSelect ? dateSelect.value : '';
+
+            if(!kelas || !date) return alert('Silakan pilih kelas dan tanggal absensi terlebih dahulu!');
+
+            const classStudents = (window.students || []).filter(s => s.kelas === kelas);
+            if(classStudents.length === 0) return alert('Tidak ada siswa di kelas ini!');
+
+            if(!window.attendanceDB) window.attendanceDB = {};
+            const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${date}`;
+            const recordData = {};
+
+            classStudents.forEach(s => {
+                const selectedOption = document.querySelector(`input[name="abs_${s.id}"]:checked`);
+                if(selectedOption) {
+                    recordData[s.id] = selectedOption.value;
+                } else {
+                    recordData[s.id] = 'H';
+                }
             });
 
-            window.attendanceDB[key] = attData;
-            saveToFirebase(`attendanceDB/${key}`, attData);
-            alert('Absensi berhasil disimpan!');
+            window.attendanceDB[recordKey] = recordData;
+            saveToFirebase('attendanceDB', window.attendanceDB);
+            alert(`Absensi kelas ${kelas} tanggal ${date} berhasil disimpan!`);
         };
 
-        // NILAI AKADEMIK & IMPORT NILAI
-        window.togglePasteNilaiModal = function() {
-            const el = document.getElementById('containerPasteNilai');
-            if(el.classList.contains('hidden')) {
-                el.classList.remove('hidden');
-            } else {
-                el.classList.add('hidden');
+        window.renderHalamanRekap = function() {
+            const headerRow = document.getElementById('halamanRekapHeaderRow');
+            const body = document.getElementById('halamanRekapTableBody');
+            if(!headerRow || !body) return;
+
+            const kelas = document.getElementById('rekapAbsenClassFilter')?.value || window.getAllClasses()[0];
+            const bulan = document.getElementById('rekapAbsenBulanFilter')?.value || String(new Date().getMonth() + 1).padStart(2, '0');
+            const tahun = document.getElementById('rekapAbsenTahunFilter')?.value || String(new Date().getFullYear());
+
+            const totalDays = new Date(parseInt(tahun), parseInt(bulan), 0).getDate();
+
+            let headerHTML = `
+                <th class="px-3 py-3 text-xs font-bold text-slate-400 uppercase w-12 text-center sticky left-0 bg-slate-950 z-10">No.</th>
+                <th class="px-3 py-3 text-xs font-bold text-slate-400 uppercase min-w-[180px] sticky left-12 bg-slate-950 z-10">Nama Siswa</th>`;
+
+            for(let d = 1; d <= totalDays; d++) {
+                headerHTML += `<th class="px-1 py-2 text-[11px] font-bold text-slate-400 text-center w-8 border-l border-slate-800/60">${d}</th>`;
             }
-        };
 
-        window.autoSaveNilaiSiswa = function(absen) {
-            const cls = document.getElementById('nilaiClassFilter').value;
-            const mapel = document.getElementById('nilaiMapelFilter').value;
-            const key = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${mapel}`;
+            headerHTML += `
+                <th class="px-2 py-3 text-xs font-bold text-emerald-400 text-center border-l border-slate-800">H</th>
+                <th class="px-2 py-3 text-xs font-bold text-amber-400 text-center">S</th>
+                <th class="px-2 py-3 text-xs font-bold text-sky-400 text-center">I</th>
+                <th class="px-2 py-3 text-xs font-bold text-rose-400 text-center">A</th>`;
 
-            if (!window.gradesDB[key]) {
-                window.gradesDB[key] = {};
+            headerRow.innerHTML = headerHTML;
+
+            const classStudents = (window.students || []).filter(s => s.kelas === kelas);
+            if(classStudents.length === 0) {
+                body.innerHTML = `<tr><td colspan="${totalDays + 6}" class="p-6 text-center text-slate-500 italic">Belum ada siswa di kelas ${escapeHTML(kelas)}.</td></tr>`;
+                return;
             }
 
-            const safeAbsen = escapeHTML(absen);
-            window.gradesDB[key][absen] = {
-                t1: document.getElementById(`t1_${safeAbsen}`)?.value || '',
-                t2: document.getElementById(`t2_${safeAbsen}`)?.value || '',
-                t3: document.getElementById(`t3_${safeAbsen}`)?.value || '',
-                t4: document.getElementById(`t4_${safeAbsen}`)?.value || '',
-                uh: document.getElementById(`uh_${safeAbsen}`)?.value || '',
-                uts: document.getElementById(`uts_${safeAbsen}`)?.value || '',
-                uas: document.getElementById(`uas_${safeAbsen}`)?.value || ''
-            };
+            body.innerHTML = '';
 
-            saveToFirebase(`gradesDB/${key}`, window.gradesDB[key]);
-        };
+            classStudents.forEach(s => {
+                let totalH = 0, totalS = 0, totalI = 0, totalA = 0;
+                let daysHTML = '';
 
-        window.renderNilai = function() {
-            const cls = document.getElementById('nilaiClassFilter').value;
-            const mapel = document.getElementById('nilaiMapelFilter').value;
-            const body = document.getElementById('nilaiTableBody');
-            if(!body) return;
+                for(let d = 1; d <= totalDays; d++) {
+                    const dayStr = String(d).padStart(2, '0');
+                    const dateStr = `${tahun}-${bulan}-${dayStr}`;
+                    const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${dateStr}`;
+                    
+                    const dayRecord = window.attendanceDB?.[recordKey];
+                    let status = '-';
+                    let badgeClass = 'text-slate-600';
 
-            const listSiswa = window.students.filter(s => s.kelas === cls);
-            body.innerHTML = listSiswa.length === 0 ? '<tr><td colspan="9" class="p-6 text-center text-slate-500 italic">Tidak ada siswa di kelas ini.</td></tr>' : '';
+                    if(dayRecord && dayRecord[s.id]) {
+                        status = dayRecord[s.id];
+                        if(status === 'H') { totalH++; badgeClass = 'text-emerald-400 font-bold'; }
+                        else if(status === 'S') { totalS++; badgeClass = 'text-amber-400 font-bold'; }
+                        else if(status === 'I') { totalI++; badgeClass = 'text-sky-400 font-bold'; }
+                        else if(status === 'A') { totalA++; badgeClass = 'text-rose-400 font-bold'; }
+                    }
 
-            const key = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${mapel}`;
-            const currentGrades = window.gradesDB[key] || {};
+                    daysHTML += `<td class="px-1 py-2 text-center text-[10px] border-l border-slate-800/40 ${badgeClass}">${status}</td>`;
+                }
 
-            listSiswa.forEach(s => {
-                const g = currentGrades[s.absen] || { t1: '', t2: '', t3: '', t4: '', uh: '', uts: '', uas: '' };
-                const safeAbsen = escapeHTML(s.absen);
                 body.innerHTML += `
-                    <tr class="hover:bg-slate-800/40">
-                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${safeAbsen}</td>
-                        <td class="px-3 py-2 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
-                        <td class="px-1.5 py-2 text-center"><input type="number" id="t1_${safeAbsen}" onchange="autoSaveNilaiSiswa('${safeAbsen}')" value="${escapeHTML(g.t1 || '')}" class="w-12 sm:w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-1.5 py-2 text-center"><input type="number" id="t2_${safeAbsen}" onchange="autoSaveNilaiSiswa('${safeAbsen}')" value="${escapeHTML(g.t2 || '')}" class="w-12 sm:w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-1.5 py-2 text-center"><input type="number" id="t3_${safeAbsen}" onchange="autoSaveNilaiSiswa('${safeAbsen}')" value="${escapeHTML(g.t3 || '')}" class="w-12 sm:w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-1.5 py-2 text-center"><input type="number" id="t4_${safeAbsen}" onchange="autoSaveNilaiSiswa('${safeAbsen}')" value="${escapeHTML(g.t4 || '')}" class="w-12 sm:w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-1.5 py-2 text-center"><input type="number" id="uh_${safeAbsen}" onchange="autoSaveNilaiSiswa('${safeAbsen}')" value="${escapeHTML(g.uh || '')}" class="w-12 sm:w-14 bg-slate-950 border border-emerald-800/80 rounded p-1 text-center text-emerald-300 font-extrabold outline-none focus:border-emerald-500"></td>
-                        <td class="px-1.5 py-2 text-center"><input type="number" id="uts_${safeAbsen}" onchange="autoSaveNilaiSiswa('${safeAbsen}')" value="${escapeHTML(g.uts || '')}" class="w-12 sm:w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
-                        <td class="px-1.5 py-2 text-center"><input type="number" id="uas_${safeAbsen}" onchange="autoSaveNilaiSiswa('${safeAbsen}')" value="${escapeHTML(g.uas || '')}" class="w-12 sm:w-14 bg-slate-950 border border-slate-800 rounded p-1 text-center text-emerald-400 font-bold outline-none focus:border-emerald-500"></td>
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold sticky left-0 bg-slate-900">${escapeHTML(s.absen)}</td>
+                        <td class="px-3 py-2 font-medium text-slate-200 sticky left-12 bg-slate-900">${escapeHTML(s.nama)}</td>
+                        ${daysHTML}
+                        <td class="px-2 py-2 text-center font-bold text-emerald-400 border-l border-slate-800">${totalH}</td>
+                        <td class="px-2 py-2 text-center font-bold text-amber-400">${totalS}</td>
+                        <td class="px-2 py-2 text-center font-bold text-sky-400">${totalI}</td>
+                        <td class="px-2 py-2 text-center font-bold text-rose-400">${totalA}</td>
                     </tr>`;
             });
         };
 
-        window.handlePasteNilaiSubmit = function() {
-            const text = document.getElementById('pasteNilaiInput').value;
-            if(!text.trim()) return alert('Tempelkan data nilai terlebih dahulu!');
+        window.downloadExcelRekapAbsen = function() {
+            const kelas = document.getElementById('rekapAbsenClassFilter')?.value || window.getAllClasses()[0];
+            const bulan = document.getElementById('rekapAbsenBulanFilter')?.value || String(new Date().getMonth() + 1).padStart(2, '0');
+            const tahun = document.getElementById('rekapAbsenTahunFilter')?.value || String(new Date().getFullYear());
 
-            const cls = document.getElementById('nilaiClassFilter').value;
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const bulanNama = monthNames[parseInt(bulan) - 1] || bulan;
+
+            const totalDays = new Date(parseInt(tahun), parseInt(bulan), 0).getDate();
+            const classStudents = (window.students || []).filter(s => s.kelas === kelas);
+
+            if(classStudents.length === 0) return alert('Tidak ada data siswa untuk didownload!');
+
+            const header = ["No", "Nama Siswa", "JK"];
+            for(let d = 1; d <= totalDays; d++) {
+                header.push(String(d));
+            }
+            header.push("H", "S", "I", "A");
+
+            const excelData = [
+                [`REKAP ABSENSI SISWA - KELAS ${kelas}`],
+                [`Bulan: ${bulanNama} ${tahun}`, `Tapel: ${window.selectedTapel}`, `Semester: ${window.selectedSemester}`],
+                [],
+                header
+            ];
+
+            classStudents.forEach(s => {
+                let totalH = 0, totalS = 0, totalI = 0, totalA = 0;
+                const row = [s.absen, s.nama, s.jk];
+
+                for(let d = 1; d <= totalDays; d++) {
+                    const dayStr = String(d).padStart(2, '0');
+                    const dateStr = `${tahun}-${bulan}-${dayStr}`;
+                    const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${dateStr}`;
+                    
+                    const dayRecord = window.attendanceDB?.[recordKey];
+                    let status = '-';
+
+                    if(dayRecord && dayRecord[s.id]) {
+                        status = dayRecord[s.id];
+                        if(status === 'H') totalH++;
+                        else if(status === 'S') totalS++;
+                        else if(status === 'I') totalI++;
+                        else if(status === 'A') totalA++;
+                    }
+                    row.push(status);
+                }
+
+                row.push(totalH, totalS, totalI, totalA);
+                excelData.push(row);
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, `Rekap Absen ${kelas}`);
+
+            const fileName = `Rekap_Absensi_Kelas_${kelas}_${bulanNama}_${tahun}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+        };
+
+        // KELOLA NILAI AKADEMIK
+        window.renderNilai = function() {
+            const body = document.getElementById('nilaiTableBody');
+            if(!body) return;
+            body.innerHTML = '';
+
+            const kelas = document.getElementById('nilaiClassFilter')?.value || window.getAllClasses()[0];
+            const mapel = document.getElementById('nilaiMapelFilter')?.value || 'MATEMATIKA';
+
+            const classStudents = (window.students || []).filter(s => s.kelas === kelas);
+            if(classStudents.length === 0) {
+                body.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-slate-500 italic">Belum ada siswa di kelas ini.</td></tr>';
+                return;
+            }
+
+            const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${mapel}`;
+            const existingGrades = window.gradesDB?.[recordKey] || {};
+
+            classStudents.forEach(s => {
+                const g = existingGrades[s.id] || { t1: '', t2: '', t3: '', t4: '', uh: '', uts: '', uas: '' };
+                body.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="px-3 py-2 text-center font-mono text-emerald-400 font-bold">${escapeHTML(s.absen)}</td>
+                        <td class="px-3 py-2 font-medium text-slate-200">${escapeHTML(s.nama)}</td>
+                        <td class="px-1 py-1 text-center"><input type="number" onchange="updateGrade('${s.id}', 't1', this.value)" value="${g.t1 || ''}" class="w-12 bg-slate-950 border border-slate-800 rounded text-center text-slate-200 p-1 text-xs"></td>
+                        <td class="px-1 py-1 text-center"><input type="number" onchange="updateGrade('${s.id}', 't2', this.value)" value="${g.t2 || ''}" class="w-12 bg-slate-950 border border-slate-800 rounded text-center text-slate-200 p-1 text-xs"></td>
+                        <td class="px-1 py-1 text-center"><input type="number" onchange="updateGrade('${s.id}', 't3', this.value)" value="${g.t3 || ''}" class="w-12 bg-slate-950 border border-slate-800 rounded text-center text-slate-200 p-1 text-xs"></td>
+                        <td class="px-1 py-1 text-center"><input type="number" onchange="updateGrade('${s.id}', 't4', this.value)" value="${g.t4 || ''}" class="w-12 bg-slate-950 border border-slate-800 rounded text-center text-slate-200 p-1 text-xs"></td>
+                        <td class="px-1 py-1 text-center"><input type="number" onchange="updateGrade('${s.id}', 'uh', this.value)" value="${g.uh || ''}" class="w-12 bg-slate-950 border border-emerald-800/60 font-bold text-emerald-400 rounded text-center p-1 text-xs"></td>
+                        <td class="px-1 py-1 text-center"><input type="number" onchange="updateGrade('${s.id}', 'uts', this.value)" value="${g.uts || ''}" class="w-12 bg-slate-950 border border-slate-800 rounded text-center text-slate-200 p-1 text-xs"></td>
+                        <td class="px-1 py-1 text-center"><input type="number" onchange="updateGrade('${s.id}', 'uas', this.value)" value="${g.uas || ''}" class="w-12 bg-slate-950 border border-slate-800 rounded text-center text-slate-200 p-1 text-xs"></td>
+                    </tr>`;
+            });
+        };
+
+        window.updateGrade = function(studentId, field, val) {
+            const kelas = document.getElementById('nilaiClassFilter').value;
             const mapel = document.getElementById('nilaiMapelFilter').value;
-            const listSiswa = window.students.filter(s => s.kelas === cls);
-            const key = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${mapel}`;
+            const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${mapel}`;
 
-            if (!window.gradesDB[key]) window.gradesDB[key] = {};
+            if(!window.gradesDB[recordKey]) window.gradesDB[recordKey] = {};
+            if(!window.gradesDB[recordKey][studentId]) window.gradesDB[recordKey][studentId] = {};
 
-            const lines = text.split(/\r?\n/);
+            window.gradesDB[recordKey][studentId][field] = val;
+            saveToFirebase('gradesDB', window.gradesDB);
+        };
+
+        window.togglePasteNilaiModal = function() {
+            const el = document.getElementById('containerPasteNilai');
+            if(el) el.classList.toggle('hidden');
+        };
+
+        window.handlePasteNilaiSubmit = function() {
+            const rawText = document.getElementById('pasteNilaiInput').value;
+            if(!rawText.trim()) return alert('Paste data nilai terlebih dahulu!');
+
+            const kelas = document.getElementById('nilaiClassFilter').value;
+            const mapel = document.getElementById('nilaiMapelFilter').value;
+            const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${mapel}`;
+
+            const classStudents = (window.students || []).filter(s => s.kelas === kelas);
+            if(!window.gradesDB[recordKey]) window.gradesDB[recordKey] = {};
+
+            const lines = rawText.split(/\r?\n/);
             lines.forEach(line => {
                 let cols = line.split('\t');
-                if(cols.length < 2) cols = line.trim().split(/\s+/);
-
                 if(cols.length >= 2) {
-                    let identifier = cols[0].trim();
-                    let student = listSiswa.find(s => s.absen === identifier || s.nama.toLowerCase() === cols[1]?.trim().toLowerCase());
-                    if (!student && cols.length > 1) {
-                        student = listSiswa.find(s => s.nama.toLowerCase() === identifier.toLowerCase());
-                    }
+                    let nameOrAbsen = cleanValue(cols[1] || cols[0]);
+                    let student = classStudents.find(s => s.nama.toLowerCase() === nameOrAbsen.toLowerCase() || s.absen === nameOrAbsen);
                     if(student) {
-                        let offset = 2;
-                        if (isNaN(cols[0]) && !listSiswa.some(s => s.absen === cols[0])) offset = 1;
-
-                        const getVal = (idx) => cols[idx] !== undefined ? cleanValue(cols[idx]) : '';
-
-                        window.gradesDB[key][student.absen] = {
-                            t1: getVal(offset),
-                            t2: getVal(offset + 1),
-                            t3: getVal(offset + 2),
-                            t4: getVal(offset + 3),
-                            uh: getVal(offset + 4),
-                            uts: getVal(offset + 5),
-                            uas: getVal(offset + 6)
+                        window.gradesDB[recordKey][student.id] = {
+                            t1: cols[2] || '',
+                            t2: cols[3] || '',
+                            t3: cols[4] || '',
+                            t4: cols[5] || '',
+                            uh: cols[6] || '',
+                            uts: cols[7] || '',
+                            uas: cols[8] || ''
                         };
                     }
                 }
             });
 
-            saveToFirebase(`gradesDB/${key}`, window.gradesDB[key]);
+            saveToFirebase('gradesDB', window.gradesDB);
             renderNilai();
             togglePasteNilaiModal();
             document.getElementById('pasteNilaiInput').value = '';
-            alert('Nilai berhasil diterapkannya dan disimpan!');
+            alert('Nilai berhasil diimpor!');
         };
 
         window.handleExcelNilai = function(e) {
             const file = e.target.files[0];
             if(!file) return;
+
+            const kelas = document.getElementById('nilaiClassFilter').value;
+            const mapel = document.getElementById('nilaiMapelFilter').value;
+            const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${mapel}`;
+
+            const classStudents = (window.students || []).filter(s => s.kelas === kelas);
+            if(!window.gradesDB[recordKey]) window.gradesDB[recordKey] = {};
+
             const reader = new FileReader();
             reader.onload = function(evt) {
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const json = XLSX.utils.sheet_to_json(sheet);
-                
-                const cls = document.getElementById('nilaiClassFilter').value;
-                const mapel = document.getElementById('nilaiMapelFilter').value;
-                const listSiswa = window.students.filter(s => s.kelas === cls);
-                const key = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${mapel}`;
-
-                if (!window.gradesDB[key]) window.gradesDB[key] = {};
 
                 json.forEach(row => {
-                    let nama = row['Nama Siswa'] || row['Nama'] || row['NAMA'] || '';
-                    let absen = row['No'] || row['No.'] || row['Absen'] || row['NO'] || '';
-                    
-                    let student = listSiswa.find(s => (absen && String(s.absen) === String(absen)) || (nama && s.nama.toLowerCase() === String(nama).trim().toLowerCase()));
+                    let nama = cleanValue(row['Nama Siswa'] || row['Nama'] || row['NAMA'] || '');
+                    let student = classStudents.find(s => s.nama.toLowerCase() === nama.toLowerCase());
                     if(student) {
-                        window.gradesDB[key][student.absen] = {
-                            t1: cleanValue(row['Tugas 1'] || row['T1'] || ''),
-                            t2: cleanValue(row['Tugas 2'] || row['T2'] || ''),
-                            t3: cleanValue(row['Tugas 3'] || row['T3'] || ''),
-                            t4: cleanValue(row['Tugas 4'] || row['T4'] || ''),
-                            uh: cleanValue(row['UH'] || row['Ulangan Harian'] || ''),
-                            uts: cleanValue(row['UTS'] || row['PTS'] || ''),
-                            uas: cleanValue(row['UAS'] || row['PAS'] || '')
+                        window.gradesDB[recordKey][student.id] = {
+                            t1: row['T1'] || row['Tugas 1'] || '',
+                            t2: row['T2'] || row['Tugas 2'] || '',
+                            t3: row['T3'] || row['Tugas 3'] || '',
+                            t4: row['T4'] || row['Tugas 4'] || '',
+                            uh: row['UH'] || row['Ulangan Harian'] || '',
+                            uts: row['UTS'] || '',
+                            uas: row['UAS'] || ''
                         };
                     }
                 });
 
-                saveToFirebase(`gradesDB/${key}`, window.gradesDB[key]);
+                saveToFirebase('gradesDB', window.gradesDB);
                 renderNilai();
-                alert('Nilai dari Excel berhasil diimport!');
+                alert('Berhasil mengimpor nilai dari file Excel!');
                 e.target.value = '';
             };
             reader.readAsArrayBuffer(file);
         };
 
         window.downloadExcelNilai = function() {
-            const cls = document.getElementById('nilaiClassFilter').value;
+            const kelas = document.getElementById('nilaiClassFilter').value;
             const mapel = document.getElementById('nilaiMapelFilter').value;
-            const listSiswa = window.students.filter(s => s.kelas === cls);
-            const key = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${mapel}`;
-            const currentGrades = window.gradesDB[key] || {};
+            const recordKey = `${window.selectedTapel}_${window.selectedSemester}_${kelas}_${mapel}`;
 
-            const dataExcel = listSiswa.map(s => {
-                const g = currentGrades[s.absen] || {};
-                return {
-                    'No. Absen': s.absen,
-                    'Nama Siswa': s.nama,
-                    'Kelas': s.kelas,
-                    'Mata Pelajaran': mapel,
-                    'Tugas 1': g.t1 || '',
-                    'Tugas 2': g.t2 || '',
-                    'Tugas 3': g.t3 || '',
-                    'Tugas 4': g.t4 || '',
-                    'UH': g.uh || '',
-                    'UTS': g.uts || '',
-                    'UAS': g.uas || ''
-                };
+            const classStudents = (window.students || []).filter(s => s.kelas === kelas);
+            const existingGrades = window.gradesDB?.[recordKey] || {};
+
+            const excelData = [
+                [`NILAI AKADEMIK - KELAS ${kelas}`],
+                [`Mata Pelajaran: ${mapel}`, `Tapel: ${window.selectedTapel}`, `Semester: ${window.selectedSemester}`],
+                [],
+                ["No", "Nama Siswa", "Tugas 1", "Tugas 2", "Tugas 3", "Tugas 4", "UH", "UTS", "UAS"]
+            ];
+
+            classStudents.forEach(s => {
+                const g = existingGrades[s.id] || {};
+                excelData.push([
+                    s.absen, s.nama, g.t1 || '', g.t2 || '', g.t3 || '', g.t4 || '', g.uh || '', g.uts || '', g.uas || ''
+                ]);
             });
 
-            const ws = XLSX.utils.json_to_sheet(dataExcel);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Nilai");
-            XLSX.writeFile(wb, `Nilai_${cls}_${mapel}_${window.selectedTapel.replace('/', '-')}_Sem${window.selectedSemester}.xlsx`);
-        };
+            const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, `Nilai ${kelas}`);
 
-        // REKAP ABSENSI
-        window.renderHalamanRekap = function() {
-            const cls = document.getElementById('rekapAbsenClassFilter').value;
-            const body = document.getElementById('halamanRekapTableBody');
-            if(!body) return;
-
-            const listSiswa = window.students.filter(s => s.kelas === cls);
-            body.innerHTML = listSiswa.length === 0 ? '<tr><td colspan="6" class="p-6 text-center text-slate-500 italic">Tidak ada siswa di kelas ini.</td></tr>' : '';
-
-            const prefix = `${window.selectedTapel}_${window.selectedSemester}_${cls}_`;
-
-            listSiswa.forEach(s => {
-                let countH = 0, countS = 0, countI = 0, countA = 0;
-
-                Object.keys(window.attendanceDB || {}).forEach(k => {
-                    if(k.startsWith(prefix)) {
-                        const dayAtt = window.attendanceDB[k] || {};
-                        const st = dayAtt[s.absen];
-                        if(st === 'H') countH++;
-                        else if(st === 'S') countS++;
-                        else if(st === 'I') countI++;
-                        else if(st === 'A') countA++;
-                    }
-                });
-
-                body.innerHTML += `
-                    <tr class="hover:bg-slate-800/40">
-                        <td class="px-3 py-2.5 text-center font-mono text-emerald-400 font-bold">${escapeHTML(s.absen)}</td>
-                        <td class="px-3 py-2.5 text-slate-200 font-medium">${escapeHTML(s.nama)}</td>
-                        <td class="px-3 py-2.5 text-center font-bold text-emerald-400 bg-emerald-950/20">${countH}</td>
-                        <td class="px-3 py-2.5 text-center font-bold text-amber-400 bg-amber-950/20">${countS}</td>
-                        <td class="px-3 py-2.5 text-center font-bold text-sky-400 bg-sky-950/20">${countI}</td>
-                        <td class="px-3 py-2.5 text-center font-bold text-rose-400 bg-rose-950/20">${countA}</td>
-                    </tr>`;
-            });
-        };
-
-        window.downloadExcelRekapAbsen = function() {
-            const cls = document.getElementById('rekapAbsenClassFilter').value;
-            const listSiswa = window.students.filter(s => s.kelas === cls);
-            const prefix = `${window.selectedTapel}_${window.selectedSemester}_${cls}_`;
-
-            const dataExcel = listSiswa.map(s => {
-                let countH = 0, countS = 0, countI = 0, countA = 0;
-                Object.keys(window.attendanceDB || {}).forEach(k => {
-                    if(k.startsWith(prefix)) {
-                        const dayAtt = window.attendanceDB[k] || {};
-                        const st = dayAtt[s.absen];
-                        if(st === 'H') countH++;
-                        else if(st === 'S') countS++;
-                        else if(st === 'I') countI++;
-                        else if(st === 'A') countA++;
-                    }
-                });
-
-                return {
-                    'No. Absen': s.absen,
-                    'Nama Siswa': s.nama,
-                    'Kelas': s.kelas,
-                    'Hadir (H)': countH,
-                    'Sakit (S)': countS,
-                    'Izin (I)': countI,
-                    'Alpa (A)': countA
-                };
-            });
-
-            const ws = XLSX.utils.json_to_sheet(dataExcel);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Rekap Absensi");
-            XLSX.writeFile(wb, `Rekap_Absensi_${cls}_${window.selectedTapel.replace('/', '-')}_Sem${window.selectedSemester}.xlsx`);
+            XLSX.writeFile(workbook, `Nilai_${kelas}_${mapel}_${window.selectedTapel.replace('/', '-')}.xlsx`);
         };
     </script>
 </body>
