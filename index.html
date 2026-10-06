@@ -25,7 +25,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 flex h-screen overflow-hidden relative selection:bg-emerald-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 flex h-screen h-[100dvh] overflow-hidden relative selection:bg-emerald-500 selection:text-white">
 
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-30 lg:hidden transition-all duration-300"></div>
 
@@ -106,7 +106,8 @@
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 bg-slate-950 space-y-4 sm:space-y-6">
+        <!-- KONTAINER KONTEN UTAMA (Ditambahkan pb-24 agar tidak terpotong di HP) -->
+        <div class="flex-1 overflow-y-auto p-3 pb-24 sm:p-6 sm:pb-12 lg:p-8 bg-slate-950 space-y-4 sm:space-y-6">
             
             <!-- TAB SISWA -->
             <section id="tab-siswa" class="tab-content active space-y-4 sm:space-y-6">
