@@ -489,6 +489,9 @@
                         </select>
                         
                         <div class="flex flex-wrap gap-2 md:ml-auto">
+                            <button onclick="simpanNilaiPermanen()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/40">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Permanen
+                            </button>
                             <label class="flex-1 md:flex-none bg-emerald-800 hover:bg-emerald-700 text-white px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-file-excel"></i> Upload Excel
                                 <input type="file" id="excelNilaiInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcelNilai(event)">
@@ -498,6 +501,9 @@
                             </button>
                             <button onclick="downloadExcelNilai()" class="flex-1 md:flex-none bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-download"></i> Download
+                            </button>
+                            <button onclick="hapusSemuaNilaiMapel()" class="flex-1 md:flex-none bg-rose-950/60 border border-rose-800/60 text-rose-400 hover:bg-rose-900 hover:text-white px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-trash-can"></i> Reset Nilai
                             </button>
                         </div>
                     </div>
@@ -2416,17 +2422,25 @@
                 const safeNama = escapeHTML(s.nama);
                 const safeId = escapeHTML(s.id);
 
+                const vT1 = escapeHTML(g.t1 !== undefined ? g.t1 : '');
+                const vT2 = escapeHTML(g.t2 !== undefined ? g.t2 : '');
+                const vT3 = escapeHTML(g.t3 !== undefined ? g.t3 : '');
+                const vT4 = escapeHTML(g.t4 !== undefined ? g.t4 : '');
+                const vUH = escapeHTML(g.uh !== undefined ? g.uh : '');
+                const vUTS = escapeHTML(g.uts !== undefined ? g.uts : '');
+                const vUAS = escapeHTML(g.uas !== undefined ? g.uas : '');
+
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40 transition-colors">
                         <td class="px-3 py-2 text-center text-slate-400 font-mono font-semibold">${idx + 1}</td>
                         <td class="px-3 py-2 font-bold text-slate-200">${safeNama}</td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t1" value="${g.t1 || ''}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't1', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t2" value="${g.t2 || ''}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't2', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t3" value="${g.t3 || ''}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't3', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t4" value="${g.t4 || ''}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't4', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uh" value="${g.uh || ''}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uh', this.value)" class="w-12 bg-slate-950 border border-emerald-900 text-center rounded-lg py-1 text-xs font-bold text-emerald-400 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uts" value="${g.uts || ''}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uts', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uas" value="${g.uas || ''}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uas', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t1" value="${vT1}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't1', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t2" value="${vT2}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't2', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t3" value="${vT3}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't3', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t4" value="${vT4}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't4', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uh" value="${vUH}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uh', this.value)" class="w-12 bg-slate-950 border border-emerald-900 text-center rounded-lg py-1 text-xs font-bold text-emerald-400 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uts" value="${vUTS}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uts', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uas" value="${vUAS}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uas', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
                     </tr>`;
             });
         };
@@ -2437,6 +2451,41 @@
 
             window.gradesDB[dbKey][studentId][field] = val;
             saveToFirebase('gradesDB', window.gradesDB);
+        };
+
+        window.simpanNilaiPermanen = function() {
+            const cls = document.getElementById('nilaiClassFilter').value;
+            const mapel = document.getElementById('nilaiMapelFilter').value;
+            const dbKey = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${mapel}`;
+
+            if(!window.gradesDB[dbKey]) window.gradesDB[dbKey] = {};
+
+            const listSiswa = (window.students || []).filter(s => s.kelas === cls);
+            listSiswa.forEach(s => {
+                const inputs = document.querySelectorAll(`input[data-sid="${s.id}"]`);
+                if(!window.gradesDB[dbKey][s.id]) window.gradesDB[dbKey][s.id] = {};
+                
+                inputs.forEach(input => {
+                    const field = input.getAttribute('data-field');
+                    window.gradesDB[dbKey][s.id][field] = input.value;
+                });
+            });
+
+            saveToFirebase('gradesDB', window.gradesDB);
+            alert(`Nilai ${mapel} kelas ${cls} berhasil disimpan secara permanen ke database!`);
+        };
+
+        window.hapusSemuaNilaiMapel = function() {
+            const cls = document.getElementById('nilaiClassFilter').value;
+            const mapel = document.getElementById('nilaiMapelFilter').value;
+
+            if(confirm(`Apakah Anda yakin ingin MENGHAPUS SELURUH NILAI (Tugas, UH, UTS, UAS) untuk kelas ${cls} pada mapel ${mapel}?`)) {
+                const dbKey = `${window.selectedTapel}_${window.selectedSemester}_${cls}_${mapel}`;
+                delete window.gradesDB[dbKey];
+                saveToFirebase('gradesDB', window.gradesDB);
+                renderNilai();
+                alert('Seluruh nilai untuk kelas dan mapel ini berhasil dibersihkan.');
+            }
         };
 
         window.togglePasteNilaiModal = function() {
@@ -2467,27 +2516,54 @@
                 if(!trimmed) return;
                 let cols = line.split('\t');
 
-                if(cols.length >= 3) {
-                    let s = listSiswa[count];
-                    if(s) {
-                        let t1 = cleanValue(cols[2] || '');
-                        let t2 = cleanValue(cols[3] || '');
-                        let t3 = cleanValue(cols[4] || '');
-                        let t4 = cleanValue(cols[5] || '');
-                        let uh = cleanValue(cols[6] || '');
-                        let uts = cleanValue(cols[7] || '');
-                        let uas = cleanValue(cols[8] || '');
+                if(cols.length >= 2) {
+                    let col1 = cleanValue(cols[0] || '');
+                    let col2 = cleanValue(cols[1] || '');
 
-                        window.gradesDB[dbKey][s.id] = { t1, t2, t3, t4, uh, uts, uas };
+                    // Abaikan baris header jika tercopy
+                    if (col1.toLowerCase().includes('no') || col2.toLowerCase().includes('nama')) return;
+
+                    let targetStudent = null;
+
+                    // 1. Coba cocokkan berdasarkan Nama Siswa terlebih dahulu
+                    targetStudent = listSiswa.find(s => 
+                        s.nama.toLowerCase().replace(/\s+/g, '') === col2.toLowerCase().replace(/\s+/g, '') ||
+                        s.nama.toLowerCase().replace(/\s+/g, '') === col1.toLowerCase().replace(/\s+/g, '')
+                    );
+
+                    // 2. Jika tidak cocok nama, gunakan urutan baris siswa
+                    if(!targetStudent) {
+                        targetStudent = listSiswa[count];
+                    }
+
+                    if(targetStudent) {
+                        let offset = 0;
+                        if (!isNaN(col1) && col1 !== '') {
+                            offset = 2; // [No, Nama, T1, T2, T3, T4, UH, UTS, UAS]
+                        } else {
+                            offset = 1; // [Nama, T1, T2, T3, T4, UH, UTS, UAS]
+                        }
+
+                        let t1 = cleanValue(cols[offset] || '');
+                        let t2 = cleanValue(cols[offset + 1] || '');
+                        let t3 = cleanValue(cols[offset + 2] || '');
+                        let t4 = cleanValue(cols[offset + 3] || '');
+                        let uh = cleanValue(cols[offset + 4] || '');
+                        let uts = cleanValue(cols[offset + 5] || '');
+                        let uas = cleanValue(cols[offset + 6] || '');
+
+                        window.gradesDB[dbKey][targetStudent.id] = { t1, t2, t3, t4, uh, uts, uas };
+
                         count++;
                     }
                 }
             });
 
+            // Simpan secara permanen ke Firebase & LocalStorage
             saveToFirebase('gradesDB', window.gradesDB);
-            renderNilai();
+            renderNilai(); // Tampilkan ulang ke tabel
             togglePasteNilaiModal();
-            alert(`Berhasil memperbarui nilai untuk ${count} siswa.`);
+            alert(`Berhasil menerapkan & menyimpan nilai secara permanen untuk ${count} siswa.`);
             document.getElementById('pasteNilaiInput').value = '';
         };
 
