@@ -573,7 +573,7 @@
                 </div>
 
                 <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
-                    <table class="w-full text-left table-auto whitespace-nowrap min-w-max">
+                    <table class="w-full text-left table-auto min-w-max">
                         <thead class="bg-slate-950 border-b border-slate-800">
                             <tr id="halamanRekapHeaderRow"></tr>
                         </thead>
@@ -2586,24 +2586,24 @@
                 return;
             }
 
-            let headerHTML = `<th class="px-3 py-3 text-xs font-bold text-slate-400 uppercase w-12 text-center sticky left-0 bg-slate-950 z-10">No</th>`;
-            headerHTML += `<th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase sticky left-12 bg-slate-950 z-10">Nama Siswa</th>`;
+            let headerHTML = `<th class="px-2 py-2.5 text-[11px] font-bold text-slate-400 uppercase w-9 text-center sticky left-0 bg-slate-950 z-20 border-r border-slate-800">No</th>`;
+            headerHTML += `<th class="px-3 py-2.5 text-[11px] font-bold text-slate-400 uppercase sticky left-9 bg-slate-950 z-20 min-w-[120px] max-w-[140px] border-r border-slate-800">Nama Siswa</th>`;
 
             for(let d = 1; d <= daysInMonth; d++) {
-                headerHTML += `<th class="px-1.5 py-2 text-[10px] font-bold text-slate-400 text-center w-7">${d}</th>`;
+                headerHTML += `<th class="px-1 py-2 text-[10px] font-bold text-slate-400 text-center w-6 min-w-[24px]">${d}</th>`;
             }
 
-            headerHTML += `<th class="px-2 py-2 text-xs font-bold text-emerald-400 text-center w-8 bg-emerald-950/40">H</th>`;
-            headerHTML += `<th class="px-2 py-2 text-xs font-bold text-sky-400 text-center w-8 bg-sky-950/40">S</th>`;
-            headerHTML += `<th class="px-2 py-2 text-xs font-bold text-amber-400 text-center w-8 bg-amber-950/40">I</th>`;
-            headerHTML += `<th class="px-2 py-2 text-xs font-bold text-rose-400 text-center w-8 bg-rose-950/40">A</th>`;
+            headerHTML += `<th class="px-1.5 py-2 text-[11px] font-bold text-emerald-400 text-center w-7 bg-emerald-950/40 border-l border-slate-800">H</th>`;
+            headerHTML += `<th class="px-1.5 py-2 text-[11px] font-bold text-sky-400 text-center w-7 bg-sky-950/40">S</th>`;
+            headerHTML += `<th class="px-1.5 py-2 text-[11px] font-bold text-amber-400 text-center w-7 bg-amber-950/40">I</th>`;
+            headerHTML += `<th class="px-1.5 py-2 text-[11px] font-bold text-rose-400 text-center w-7 bg-rose-950/40">A</th>`;
 
             headerRow.innerHTML = headerHTML;
 
             listSiswa.forEach((s, idx) => {
                 let rowHTML = `<tr class="hover:bg-slate-800/40 transition-colors">`;
-                rowHTML += `<td class="px-3 py-2 text-center text-slate-400 font-mono font-semibold sticky left-0 bg-slate-900 z-10">${idx + 1}</td>`;
-                rowHTML += `<td class="px-4 py-2 font-bold text-slate-200 sticky left-12 bg-slate-900 z-10 truncate max-w-[160px]">${escapeHTML(s.nama)}</td>`;
+                rowHTML += `<td class="px-2 py-2 text-center text-slate-400 font-mono text-[11px] font-semibold sticky left-0 bg-slate-900 z-10 border-r border-slate-800">${idx + 1}</td>`;
+                rowHTML += `<td class="px-2.5 py-2 font-semibold text-slate-200 sticky left-9 bg-slate-900 z-10 min-w-[120px] max-w-[140px] text-[11px] leading-tight whitespace-normal break-words border-r border-slate-800">${escapeHTML(s.nama)}</td>`;
 
                 let countH = 0, countS = 0, countI = 0, countA = 0;
 
@@ -2625,13 +2625,13 @@
                     else if(status === 'I') badgeClass = 'text-amber-400 font-bold';
                     else if(status === 'A') badgeClass = 'text-rose-400 font-bold';
 
-                    rowHTML += `<td class="px-1 py-2 text-center text-[10px] ${badgeClass}">${status}</td>`;
+                    rowHTML += `<td class="px-0.5 py-2 text-center text-[10px] ${badgeClass}">${status}</td>`;
                 }
 
-                rowHTML += `<td class="px-2 py-2 text-center font-bold text-emerald-400 bg-emerald-950/20">${countH}</td>`;
-                rowHTML += `<td class="px-2 py-2 text-center font-bold text-sky-400 bg-sky-950/20">${countS}</td>`;
-                rowHTML += `<td class="px-2 py-2 text-center font-bold text-amber-400 bg-amber-950/20">${countI}</td>`;
-                rowHTML += `<td class="px-2 py-2 text-center font-bold text-rose-400 bg-rose-950/20">${countA}</td>`;
+                rowHTML += `<td class="px-1.5 py-2 text-center font-bold text-[11px] text-emerald-400 bg-emerald-950/20 border-l border-slate-800">${countH}</td>`;
+                rowHTML += `<td class="px-1.5 py-2 text-center font-bold text-[11px] text-sky-400 bg-sky-950/20">${countS}</td>`;
+                rowHTML += `<td class="px-1.5 py-2 text-center font-bold text-[11px] text-amber-400 bg-amber-950/20">${countI}</td>`;
+                rowHTML += `<td class="px-1.5 py-2 text-center font-bold text-[11px] text-rose-400 bg-rose-950/20">${countA}</td>`;
                 rowHTML += `</tr>`;
 
                 tbody.innerHTML += rowHTML;
