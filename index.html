@@ -490,7 +490,7 @@
                         
                         <div class="flex flex-wrap gap-2 md:ml-auto">
                             <button onclick="simpanNilaiPermanen()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/40">
-                                <i class="fa-solid fa-floppy-disk"></i> Simpan Permanen
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan
                             </button>
                             <label class="flex-1 md:flex-none bg-emerald-800 hover:bg-emerald-700 text-white px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-file-excel"></i> Upload Excel
@@ -517,7 +517,7 @@
                         <div class="flex justify-end gap-2">
                             <button onclick="togglePasteNilaiModal()" class="px-3 py-1.5 text-slate-400 text-xs font-bold hover:bg-slate-800 rounded-xl">Batal</button>
                             <button onclick="handlePasteNilaiSubmit()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center gap-1">
-                                <i class="fa-solid fa-check"></i> Terapkan
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan
                             </button>
                         </div>
                     </div>
@@ -533,9 +533,11 @@
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-16">Tugas 2</th>
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-16">Tugas 3</th>
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-16">Tugas 4</th>
-                                <th class="px-2 py-3 text-xs font-bold text-emerald-400 uppercase text-center w-16">UH</th>
+                                <th class="px-2 py-3 text-xs font-bold text-sky-400 uppercase text-center w-20">Rata TGS</th>
+                                <th class="px-2 py-3 text-xs font-bold text-amber-400 uppercase text-center w-16">UH</th>
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-16">UTS</th>
                                 <th class="px-2 py-3 text-xs font-bold text-slate-400 uppercase text-center w-16">UAS</th>
+                                <th class="px-2 py-3 text-xs font-bold text-emerald-400 uppercase text-center w-20">Nilai Akhir</th>
                             </tr>
                         </thead>
                         <tbody id="nilaiTableBody" class="divide-y divide-slate-800/60 text-xs"></tbody>
@@ -2410,7 +2412,7 @@
 
             const listSiswa = (window.students || []).filter(s => s.kelas === cls);
             if(listSiswa.length === 0) {
-                body.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-slate-500 italic">Tidak ada siswa di kelas ini.</td></tr>';
+                body.innerHTML = '<tr><td colspan="11" class="p-6 text-center text-slate-500 italic">Tidak ada siswa di kelas ini.</td></tr>';
                 return;
             }
 
@@ -2422,25 +2424,47 @@
                 const safeNama = escapeHTML(s.nama);
                 const safeId = escapeHTML(s.id);
 
-                const vT1 = escapeHTML(g.t1 !== undefined ? g.t1 : '');
-                const vT2 = escapeHTML(g.t2 !== undefined ? g.t2 : '');
-                const vT3 = escapeHTML(g.t3 !== undefined ? g.t3 : '');
-                const vT4 = escapeHTML(g.t4 !== undefined ? g.t4 : '');
-                const vUH = escapeHTML(g.uh !== undefined ? g.uh : '');
-                const vUTS = escapeHTML(g.uts !== undefined ? g.uts : '');
-                const vUAS = escapeHTML(g.uas !== undefined ? g.uas : '');
+                const vT1 = g.t1 !== undefined ? g.t1 : '';
+                const vT2 = g.t2 !== undefined ? g.t2 : '';
+                const vT3 = g.t3 !== undefined ? g.t3 : '';
+                const vT4 = g.t4 !== undefined ? g.t4 : '';
+                const vUH = g.uh !== undefined ? g.uh : '';
+                const vUTS = g.uts !== undefined ? g.uts : '';
+                const vUAS = g.uas !== undefined ? g.uas : '';
+
+                // Hitung Rata-rata Tugas
+                let sumTugas = 0, countTugas = 0;
+                [vT1, vT2, vT3, vT4].forEach(val => {
+                    if (val !== '' && !isNaN(val)) {
+                        sumTugas += parseFloat(val);
+                        countTugas++;
+                    }
+                });
+                const rataTugas = countTugas > 0 ? (sumTugas / countTugas) : 0;
+                const displayRataTugas = countTugas > 0 ? (Number.isInteger(rataTugas) ? rataTugas : rataTugas.toFixed(1)) : '-';
+
+                // Hitung Nilai Akhir (Rata Tugas + UH + UTS + UAS) / 4
+                const numUH = (vUH !== '' && !isNaN(vUH)) ? parseFloat(vUH) : 0;
+                const numUTS = (vUTS !== '' && !isNaN(vUTS)) ? parseFloat(vUTS) : 0;
+                const numUAS = (vUAS !== '' && !isNaN(vUAS)) ? parseFloat(vUAS) : 0;
+
+                const nilaiAkhir = (rataTugas + numUH + numUTS + numUAS) / 4;
+                const hasAnyGrade = countTugas > 0 || vUH !== '' || vUTS !== '' || vUAS !== '';
+                const displayNilaiAkhir = hasAnyGrade ? (Number.isInteger(nilaiAkhir) ? nilaiAkhir : nilaiAkhir.toFixed(1)) : '-';
 
                 body.innerHTML += `
                     <tr class="hover:bg-slate-800/40 transition-colors">
                         <td class="px-3 py-2 text-center text-slate-400 font-mono font-semibold">${idx + 1}</td>
                         <td class="px-3 py-2 font-bold text-slate-200">${safeNama}</td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t1" value="${vT1}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't1', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t2" value="${vT2}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't2', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t3" value="${vT3}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't3', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t4" value="${vT4}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't4', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uh" value="${vUH}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uh', this.value)" class="w-12 bg-slate-950 border border-emerald-900 text-center rounded-lg py-1 text-xs font-bold text-emerald-400 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uts" value="${vUTS}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uts', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
-                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uas" value="${vUAS}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uas', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t1" value="${escapeHTML(vT1)}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't1', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t2" value="${escapeHTML(vT2)}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't2', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t3" value="${escapeHTML(vT3)}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't3', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="t4" value="${escapeHTML(vT4)}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 't4', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center font-bold text-sky-400 font-mono">${displayRataTugas}</td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uh" value="${escapeHTML(vUH)}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uh', this.value)" class="w-12 bg-slate-950 border border-amber-900/60 text-center rounded-lg py-1 text-xs font-bold text-amber-400 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uts" value="${escapeHTML(vUTS)}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uts', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center"><input type="number" data-sid="${safeId}" data-field="uas" value="${escapeHTML(vUAS)}" onchange="updateSingleGrade('${dbKey}', '${safeId}', 'uas', this.value)" class="w-12 bg-slate-950 border border-slate-800 text-center rounded-lg py-1 text-xs font-semibold text-slate-200 outline-none focus:border-emerald-500"></td>
+                        <td class="px-1 py-2 text-center font-extrabold text-emerald-400 font-mono bg-emerald-950/20 rounded-lg">${displayNilaiAkhir}</td>
                     </tr>`;
             });
         };
@@ -2451,6 +2475,7 @@
 
             window.gradesDB[dbKey][studentId][field] = val;
             saveToFirebase('gradesDB', window.gradesDB);
+            renderNilai();
         };
 
         window.simpanNilaiPermanen = function() {
@@ -2472,6 +2497,7 @@
             });
 
             saveToFirebase('gradesDB', window.gradesDB);
+            renderNilai();
             alert(`Nilai ${mapel} kelas ${cls} berhasil disimpan secara permanen ke database!`);
         };
 
@@ -2563,7 +2589,7 @@
             saveToFirebase('gradesDB', window.gradesDB);
             renderNilai(); // Tampilkan ulang ke tabel
             togglePasteNilaiModal();
-            alert(`Berhasil menerapkan & menyimpan nilai secara permanen untuk ${count} siswa.`);
+            alert(`Berhasil menyimpan nilai secara permanen untuk ${count} siswa.`);
             document.getElementById('pasteNilaiInput').value = '';
         };
 
@@ -2621,16 +2647,45 @@
 
             const exportData = listSiswa.map((s, idx) => {
                 const g = mapelGrades[s.id] || {};
+                
+                const vT1 = g.t1 !== undefined ? g.t1 : '';
+                const vT2 = g.t2 !== undefined ? g.t2 : '';
+                const vT3 = g.t3 !== undefined ? g.t3 : '';
+                const vT4 = g.t4 !== undefined ? g.t4 : '';
+                const vUH = g.uh !== undefined ? g.uh : '';
+                const vUTS = g.uts !== undefined ? g.uts : '';
+                const vUAS = g.uas !== undefined ? g.uas : '';
+
+                let sumTugas = 0, countTugas = 0;
+                [vT1, vT2, vT3, vT4].forEach(val => {
+                    if (val !== '' && !isNaN(val)) {
+                        sumTugas += parseFloat(val);
+                        countTugas++;
+                    }
+                });
+                const rataTugas = countTugas > 0 ? (sumTugas / countTugas) : 0;
+                const displayRataTugas = countTugas > 0 ? (Number.isInteger(rataTugas) ? rataTugas : parseFloat(rataTugas.toFixed(1))) : '';
+
+                const numUH = (vUH !== '' && !isNaN(vUH)) ? parseFloat(vUH) : 0;
+                const numUTS = (vUTS !== '' && !isNaN(vUTS)) ? parseFloat(vUTS) : 0;
+                const numUAS = (vUAS !== '' && !isNaN(vUAS)) ? parseFloat(vUAS) : 0;
+
+                const nilaiAkhir = (rataTugas + numUH + numUTS + numUAS) / 4;
+                const hasAnyGrade = countTugas > 0 || vUH !== '' || vUTS !== '' || vUAS !== '';
+                const displayNilaiAkhir = hasAnyGrade ? (Number.isInteger(nilaiAkhir) ? nilaiAkhir : parseFloat(nilaiAkhir.toFixed(1))) : '';
+
                 return {
                     'No': idx + 1,
                     'Nama Siswa': s.nama,
-                    'Tugas 1': g.t1 || '',
-                    'Tugas 2': g.t2 || '',
-                    'Tugas 3': g.t3 || '',
-                    'Tugas 4': g.t4 || '',
-                    'UH': g.uh || '',
-                    'UTS': g.uts || '',
-                    'UAS': g.uas || ''
+                    'Tugas 1': vT1,
+                    'Tugas 2': vT2,
+                    'Tugas 3': vT3,
+                    'Tugas 4': vT4,
+                    'Rata-rata Tugas': displayRataTugas,
+                    'UH': vUH,
+                    'UTS': vUTS,
+                    'UAS': vUAS,
+                    'Nilai Akhir': displayNilaiAkhir
                 };
             });
 
