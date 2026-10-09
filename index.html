@@ -1063,22 +1063,30 @@
                 : (JSON.parse(localStorage.getItem('app_teachers')) || []);
 
             const normalizeStr = str => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const namaIn = normalizeStr(namaInput);
+            const nipInTrim = nipInput.trim();
 
             const matchedGuru = teacherList.find(g => {
                 const namaDb = normalizeStr(g.nama);
                 const userDb = normalizeStr(g.username || '');
-                const namaIn = normalizeStr(namaInput);
+                const kodeDb = normalizeStr(g.kode || '');
                 const passDb = (g.email || g.password || '').trim();
 
-                const namaMatch = (namaDb === namaIn || userDb === namaIn || namaDb.includes(namaIn) || namaIn.includes(namaDb));
-                const passMatch = (!passDb || passDb === '-') ? true : (passDb === nipInput.trim());
+                const isNameOrUserOrKode = (
+                    namaDb === namaIn || 
+                    userDb === namaIn || 
+                    kodeDb === namaIn || 
+                    (namaIn.length >= 3 && (namaDb.includes(namaIn) || userDb.includes(namaIn)))
+                );
 
-                return namaMatch && passMatch;
+                const isPassValid = (!passDb || passDb === '-') ? true : (passDb === nipInTrim);
+
+                return isNameOrUserOrKode && isPassValid;
             });
 
             if (matchedGuru) {
-                if ((!matchedGuru.email || matchedGuru.email === '-') && nipInput) {
-                    matchedGuru.email = nipInput;
+                if ((!matchedGuru.email || matchedGuru.email === '-') && nipInTrim) {
+                    matchedGuru.email = nipInTrim;
                 }
                 localStorage.setItem('app_loggedInGuru', JSON.stringify(matchedGuru));
                 checkAuthSession();
