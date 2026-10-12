@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistem Akademik - SMPN 3 Besuki</title>
+    
+    <!-- OPTIMASI KONEKSI CDN -->
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -53,6 +59,19 @@
             <p class="text-[10px] text-slate-500">Privasi & Akses Terjaga. Hak Akses Diberikan Sesuai Mapel Masing-masing.</p>
         </div>
     </div>
+
+    <!-- QUICK AUTH CHECK (SUPER FAST LOAD) -->
+    <script>
+        (function quickAuthCheck() {
+            try {
+                const savedUser = localStorage.getItem('app_loggedInGuru');
+                if (savedUser) {
+                    const loginModal = document.getElementById('loginModal');
+                    if (loginModal) loginModal.classList.add('hidden');
+                }
+            } catch (e) {}
+        })();
+    </script>
 
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-30 lg:hidden transition-all duration-300"></div>
 
@@ -1015,7 +1034,7 @@
             });
         };
 
-        function checkAuthSession() {
+        window.checkAuthSession = function() {
             const savedUser = localStorage.getItem('app_loggedInGuru');
             if (savedUser) {
                 const userObj = JSON.parse(savedUser);
@@ -1033,8 +1052,9 @@
                 document.getElementById('loginModal').classList.remove('hidden');
                 document.getElementById('userProfileCard').classList.add('hidden');
             }
-        }
+        };
 
+        // OPTIMASI LOGIN SUPER CEPAT MENGGUNAKAN LOCAL STORAGE TERLEBIH DAHULU
         window.loginWithGuru = function(e) {
             e.preventDefault();
             const namaInput = cleanValue(document.getElementById('loginNamaGuru').value);
@@ -1054,11 +1074,11 @@
                     mapel: 'Semua'
                 };
                 localStorage.setItem('app_loggedInGuru', JSON.stringify(adminGuru));
-                checkAuthSession();
+                window.checkAuthSession();
                 return;
             }
 
-            const teacherList = window.teachers && window.teachers.length > 0 
+            const teacherList = (window.teachers && window.teachers.length > 0) 
                 ? window.teachers 
                 : (JSON.parse(localStorage.getItem('app_teachers')) || []);
 
@@ -1089,7 +1109,7 @@
                     matchedGuru.email = nipInTrim;
                 }
                 localStorage.setItem('app_loggedInGuru', JSON.stringify(matchedGuru));
-                checkAuthSession();
+                window.checkAuthSession();
             } else {
                 alert("Login gagal! Nama Guru/Username atau Password tidak sesuai.");
             }
@@ -1387,7 +1407,7 @@
             renderTapelDropdown();
             document.getElementById('topbarSemester').value = window.selectedSemester;
             
-            checkAuthSession();
+            window.checkAuthSession();
             renderStudents();
             renderRombelCards();
             renderWaliKelas();
